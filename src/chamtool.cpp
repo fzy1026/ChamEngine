@@ -1,5 +1,3 @@
-#ifndef CHAMTOOL_H
-#define CHAMTOOL_H
 #include <easyx/easyx.h>
 #include <easyx/graphics.h>
 #include <math.h>
@@ -9,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "../include/chamtool.h"
 
 
 using namespace std;
@@ -24,7 +23,7 @@ int RAND()
 
 
 //生成[min,max]范围内，步长为Div的随机数
-double Rand(double Min, double Max, double Div = 1)
+double Rand(double Min, double Max, double Div)
 {
 	int nmin = floor(Min / Div);
 	int nmax = floor(Max / Div);
@@ -32,7 +31,7 @@ double Rand(double Min, double Max, double Div = 1)
 }
 
 
-bool IsInRange(double x, double L, double R, bool HL = true, bool HR = true)
+bool IsInRange(double x, double L, double R, bool HL, bool HR)
 {
 	if (L > R)
 	{
@@ -55,7 +54,7 @@ bool IsInRange(double x, double L, double R, bool HL = true, bool HR = true)
 	return ans;
 }
 
-bool AngleIsInRange(double x, double L, double R, bool HL = true, bool HR = true)
+bool AngleIsInRange(double x, double L, double R, bool HL, bool HR)
 {
 	while(R < L)
 		R += 2 * PI;
@@ -78,27 +77,25 @@ bool AngleIsInRange(double x, double L, double R, bool HL = true, bool HR = true
 	return ans;
 }
 
-bool Equal(double a, double b, double eps = 1e-6)
+bool Equal(double a, double b, double eps)
 {
 	return fabs(a - b) < eps;
 }
 
-bool Equal(float a, float b, float eps = 1e-6f)
+bool Equal(float a, float b, float eps)
 {
 	return fabs(a - b) < eps;
 }
 
-bool EqualZero(double a, double eps = 1e-6)
+bool EqualZero(double a, double eps)
 {
 	return fabs(a) < eps;
 }
 
-bool EqualZero(float a, float eps = 1e-6f)
+bool EqualZero(float a, float eps)
 {
 	return fabs(a) < eps;
 }
 
 
 
-
-#endif

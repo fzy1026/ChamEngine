@@ -14,7 +14,7 @@
 				"-leasyx"
 			],
 			"options": {
-				"cwd": "C:/mingw64/bin"
+				"cwd": "${workspaceFolder}"
 			},
 			"problemMatcher": [
 				"$gcc"

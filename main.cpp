@@ -1,30 +1,29 @@
-#include "lib/chamtool.h"
-#include "lib/chamgame.h"
+#include "include/chamtool.h"
+#include "include/chamgame.h"
 #include <vector>
 #include <iostream>
 
 using namespace std;
 
 
-int main()
-{
-	initgraph(800, 600);
-	Position origin(0,600);
-	double step = PI/18;
+int main() {
+	initgraph(640, 480);
+
+	// 定义图像
+	IMAGE img1, img2;
 	
-	for(double i=0;i <= 2*PI;i+=step)
-	{
-		for(double j=i+step;j <= 2*PI;j+=step)
-		{
-			Line arc(Point(400,300),i,j,100);
-			arc.Draw(origin, WHITE);
-			arc.GetAABB().Draw(origin, RED);
-			Line(arc.a,arc.b).Draw(origin, GREEN);
-			usleep(10000);
-			clearrectangle(0,0,800,600);
-		}
-	}
+	// 从文件加载图像
+	loadimage(&img1, _T("test.png"),100,100,1);
+	// 旋转图像 30 度 (PI / 6)
+	rotateimage(&img2, &img1, PI / 4,BLACK,true,true);
+	
+	// 显示旋转后的图像
+	putimage(320, 240, &img2);
+
+	// 按任意键退出
+	getch();
 	closegraph();
+
 	return 0;
 
 }
