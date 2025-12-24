@@ -1,0 +1,2 @@
+C:\mingw64\bin\ar.exe qc libChamTool.a CMakeFiles/ChamTool.dir/src/chamtool.cpp.obj
+C:\mingw64\bin\ranlib.exe libChamTool.a

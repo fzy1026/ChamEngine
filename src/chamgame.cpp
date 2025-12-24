@@ -95,7 +95,9 @@ Point::Point(Position p)
 
 void Point::Draw(Position origin, COLORREF color) // 相对坐标转绝对坐标绘制
 {
-	putpixel(origin.x + pos.x, origin.y - pos.y, color);
+	setlinecolor(color);
+	setfillcolor(color);
+	fillcircle(origin.x + pos.x, origin.y - pos.y,2);
 }
 
 AABB Point::GetAABB()
@@ -473,10 +475,27 @@ void Entity::DelSkin(int index)
 	}
 }
 
-void Entity::AddSkin(IMAGE img)
+int Entity::AddSkin(IMAGE img)
 {
 	skins.push_back(img);
+	return skins.size()-1;
 }
+
+int Entity::AddSkin(string path)
+{
+	IMAGE img;
+	loadimage(&img, (LPCSTR)path.c_str());
+	skins.push_back(img);
+	return skins.size() - 1;
+}
+
+void Entity::Draw(Position origin)
+{
+	Position realPos = pos.RelToAbs(origin);
+	putimage(realPos.x, realPos.y, &skin);
+}
+
+
 
 bool Crash(Entity a, Entity b)
 {

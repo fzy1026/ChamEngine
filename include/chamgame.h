@@ -134,7 +134,9 @@ public:
 	Shape GetCrashBox();
 	void SetSkin(int index);
 	void DelSkin(int index);
-	void AddSkin(IMAGE img);
+	int AddSkin(IMAGE img);
+	int AddSkin(string path);
+	void Draw(Position origin);
 };
 
 bool Crash(Entity a, Entity b);

@@ -11,9 +11,7 @@
 
 
 using namespace std;
-const double PI = 3.14159;
 
-vector<int> TestVector;
 
 //生成范围为原版平方的大随机数
 int RAND()

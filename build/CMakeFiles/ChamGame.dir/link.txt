@@ -1,0 +1,2 @@
+C:\mingw64\bin\ar.exe qc libChamGame.a CMakeFiles/ChamGame.dir/src/chamgame.cpp.obj
+C:\mingw64\bin\ranlib.exe libChamGame.a

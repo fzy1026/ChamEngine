@@ -2,7 +2,7 @@
 #include "../include/chammath.h"
 
 
-Matrix::Matrix(int H, int W, double **Vals = NULL)
+Matrix::Matrix(int H, int W, double **Vals)
 {
     hight = H;
     width = W;

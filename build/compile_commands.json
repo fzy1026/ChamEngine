@@ -1,0 +1,26 @@
+[
+{
+  "directory": "C:/Users/Cham/Desktop/code/ChamEngine/build",
+  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/ChamMath.dir/includes_CXX.rsp -g -std=gnu++11 -o CMakeFiles\\ChamMath.dir\\src\\chammath.cpp.obj -c C:\\Users\\Cham\\Desktop\\code\\ChamEngine\\src\\chammath.cpp",
+  "file": "C:/Users/Cham/Desktop/code/ChamEngine/src/chammath.cpp",
+  "output": "CMakeFiles/ChamMath.dir/src/chammath.cpp.obj"
+},
+{
+  "directory": "C:/Users/Cham/Desktop/code/ChamEngine/build",
+  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/ChamTool.dir/includes_CXX.rsp -g -std=gnu++11 -o CMakeFiles\\ChamTool.dir\\src\\chamtool.cpp.obj -c C:\\Users\\Cham\\Desktop\\code\\ChamEngine\\src\\chamtool.cpp",
+  "file": "C:/Users/Cham/Desktop/code/ChamEngine/src/chamtool.cpp",
+  "output": "CMakeFiles/ChamTool.dir/src/chamtool.cpp.obj"
+},
+{
+  "directory": "C:/Users/Cham/Desktop/code/ChamEngine/build",
+  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/ChamGame.dir/includes_CXX.rsp -g -std=gnu++11 -o CMakeFiles\\ChamGame.dir\\src\\chamgame.cpp.obj -c C:\\Users\\Cham\\Desktop\\code\\ChamEngine\\src\\chamgame.cpp",
+  "file": "C:/Users/Cham/Desktop/code/ChamEngine/src/chamgame.cpp",
+  "output": "CMakeFiles/ChamGame.dir/src/chamgame.cpp.obj"
+},
+{
+  "directory": "C:/Users/Cham/Desktop/code/ChamEngine/build",
+  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/Main.dir/includes_CXX.rsp -g -std=gnu++11 -o CMakeFiles\\Main.dir\\Main.cpp.obj -c C:\\Users\\Cham\\Desktop\\code\\ChamEngine\\Main.cpp",
+  "file": "C:/Users/Cham/Desktop/code/ChamEngine/Main.cpp",
+  "output": "CMakeFiles/Main.dir/Main.cpp.obj"
+}
+]
