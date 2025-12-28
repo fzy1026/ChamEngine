@@ -1,6 +1,0 @@
-C:/Users/Cham/Desktop/code/ChamEngine/build/CMakeFiles/ChamMath.dir
-C:/Users/Cham/Desktop/code/ChamEngine/build/CMakeFiles/ChamTool.dir
-C:/Users/Cham/Desktop/code/ChamEngine/build/CMakeFiles/ChamGame.dir
-C:/Users/Cham/Desktop/code/ChamEngine/build/CMakeFiles/Main.dir
-C:/Users/Cham/Desktop/code/ChamEngine/build/CMakeFiles/edit_cache.dir
-C:/Users/Cham/Desktop/code/ChamEngine/build/CMakeFiles/rebuild_cache.dir

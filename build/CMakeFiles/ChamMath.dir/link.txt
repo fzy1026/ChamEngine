@@ -1,2 +1,0 @@
-C:\mingw64\bin\ar.exe qc libChamMath.a CMakeFiles/ChamMath.dir/src/chammath.cpp.obj
-C:\mingw64\bin\ranlib.exe libChamMath.a

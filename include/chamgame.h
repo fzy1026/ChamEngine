@@ -3,6 +3,7 @@
 #include "chamtool.h"
 #include "chammath.h"
 using namespace std;
+class Object;
 class Position;
 class Scene;
 class Window;
@@ -24,6 +25,13 @@ public:
 	void Set(int X, int Y);
 	Position operator+(const Position &p) const;
 	Position operator-(const Position &p) const;
+	Position operator*(const int &p) const;
+	Position operator*(const long &p) const;
+	Position operator*(const long long &p) const;
+	Position operator/(const int &p) const;
+	Position operator/(const long &p) const;
+	Position operator/(const long long &p) const;
+
 	Position RelToAbs(Position origin);
 };
 
@@ -46,61 +54,72 @@ public:
 // 包围盒碰撞检测
 bool Crash(AABB a, AABB b);
 
-/*
-点类
-用于定义线类
-*/
-class Point
+class Object
 {
 public:
 	Position pos;
-
-	Point();
-
-	Point(int x, int y);
-
-	Point(Position p);
 	void Draw(Position origin, COLORREF color = WHITE); // 相对坐标转绝对坐标绘制
-	AABB GetAABB();
 	void Move(Position delta);
 	void Move(int dx, int dy);
 	void MoveTo(Position newPos);
 	void MoveTo(int x, int y);
 	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
-	void Zoom(Point center, double scale); // 以center为中心缩放scale倍
-	
+	void Zoom(Point center, double scale);	 // 以center为中心缩放scale倍
+};
+
+/*
+点类
+用于定义线类
+*/
+class Point : public Object
+{
+public:
+	Point();
+	Point(int x, int y);
+	Point(Position p);
+	AABB GetAABB();
+	void Draw(Position origin, COLORREF color = WHITE); // 相对坐标转绝对坐标绘制
+	void Move(Position delta);
+	void Move(int dx, int dy);
+	void MoveTo(Position newPos);
+	void MoveTo(int x, int y);
+	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
+	void Zoom(Point center, double scale);	 // 以center为中心缩放scale倍
 };
 
 double Distance(Point a, Point b);
+
+Point MidPoint(Point a, Point b);
 
 /*
 线类
 包含直线与圆弧
 */
 
-class Line
+class Line : public Object
 {
 public:
 	Point a, b;	  // 线的两个端点
 	Point center; // 圆弧的圆心
 	bool type;	  // 0直线，1圆弧
 
-	Line(Point A, Point B); // 作为直线构建
+	Line(Point A, Point B);										 // 作为直线构建
 	Line(Point C, double StartAngle, double EndAngle, double r); // 作为圆弧角度构建
-	void Move(Position delta);
-	void Move(int dx, int dy);
-	void Rotate(Point centerPoint, double angle); // 以centerPoint为中心逆时针旋转angle弧度
-	void Zoom(Point centerPoint, double scale); // 以centerPoint为中心缩放scale倍
-	void Draw(Position origin, COLORREF color = WHITE);
 	double Radius();
 	double *GetParameters();
 	AABB GetAABB();
 	bool Contains(Point p);
 	double *Paramater();
+	void Draw(Position origin, COLORREF color = WHITE); // 相对坐标转绝对坐标绘制
+	void Move(Position delta);
+	void Move(int dx, int dy);
+	void MoveTo(Position newPos);
+	void MoveTo(int x, int y);
+	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
+	void Zoom(Point center, double scale);	 // 以center为中心缩放scale倍
 };
 
 double Distance(Line l, Point p); // 点与直线/圆周距离
-
 
 bool Crash(Line a, Line b);
 
@@ -112,17 +131,40 @@ public:
 	Shape(vector<Line> L);
 	Shape();
 	AABB GetAABB();
-	void Draw(Position origin, COLORREF color = WHITE);
-	void Rotate(Point centerPoint, double angle); // 以centerPoint为中心逆时针旋转angle弧度
-	void Zoom(Point centerPoint, double scale); // 以centerPoint为中心缩放scale倍
+	void Draw(Position origin, COLORREF color = WHITE); // 相对坐标转绝对坐标绘制
+	void Move(Position delta);
+	void Move(int dx, int dy);
+	void MoveTo(Position newPos);
+	void MoveTo(int x, int y);
+	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
+	void Zoom(Point center, double scale);	 // 以center为中心缩放scale倍
+	
 };
 
 bool Crash(Shape a, Shape b);
 
-class Entity
+//
+class Image : public Object
 {
 public:
-	Position pos;
+	string address;
+	IMAGE image;
+	int height, width;
+	Image(string Address, int Height = 0, int Width = 0);
+	Image(IMAGE NewImage, int Height = 0, int Width = 0);
+	void SetSize(int Height, int Width);
+	void Draw(Position origin, COLORREF color = WHITE); // 相对坐标转绝对坐标绘制
+	void Move(Position delta);
+	void Move(int dx, int dy);
+	void MoveTo(Position newPos);
+	void MoveTo(int x, int y);
+	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
+	void Zoom(Point center, double scale);	 // 以center为中心缩放scale倍
+};
+
+class Entity : public Object
+{
+public:
 	Shape CrashBox;
 	vector<IMAGE> skins;
 	IMAGE skin;
@@ -136,7 +178,13 @@ public:
 	void DelSkin(int index);
 	int AddSkin(IMAGE img);
 	int AddSkin(string path);
-	void Draw(Position origin);
+	void Draw(Position origin,COLORREF color = WHITE);//相对坐标转绝对坐标绘制
+	void Move(Position delta);
+	void Move(int dx, int dy);
+	void MoveTo(Position newPos);
+	void MoveTo(int x, int y);
+	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
+	void Zoom(Point center, double scale); // 以center为中心缩放scale倍
 };
 
 bool Crash(Entity a, Entity b);
@@ -149,7 +197,7 @@ class Scene
 {
 private:
 	int height, width;
-	Position origin;//原点在EasyX的绝对坐标
+	Position origin; // 原点在EasyX的绝对坐标
 
 public:
 	Scene(int H = 600, int W = 800);

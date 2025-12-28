@@ -12,6 +12,7 @@ int main() {
 	Entity entity;
 	entity.SetPosition(100, 100);
 	entity.SetSkin(entity.AddSkin("resources\\images\\test.png"));
+	entity.skin.Resize(100,100);
 	entity.Draw(Position(0, 480));
 
 	// 按任意键退出

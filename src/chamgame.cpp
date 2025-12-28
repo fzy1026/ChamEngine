@@ -34,6 +34,36 @@ Position Position::RelToAbs(Position origin)
 	return Position(origin.x + x, origin.y - y);
 }
 
+Position Position::operator*(const int &p)const
+{
+	return Position(x*p,y*p);
+}
+
+Position Position::operator*(const long &p)const
+{
+	return Position(x*p,y*p);
+}
+
+Position Position::operator*(const long long &	p)const
+{
+	return Position(x*p,y*p);
+}
+
+Position Position::operator/(const int &p)const
+{
+	return Position(x/p,y/p);
+}
+
+Position Position::operator/(const long &p)const
+{
+	return Position(x/p,y/p);
+}
+
+Position Position::operator/(const long long &	p)const
+{
+	return Position(x/p,y/p);
+}
+
 double Distance(Position a, Position b)
 {
 	return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
@@ -143,7 +173,12 @@ void Point::Zoom(Point center, double scale) // 以center为中心缩放scale倍
 
 double Distance(Point a, Point b)
 {
-	return Distance(a.pos, b.pos);
+	return Distance(a.pos,b.pos);
+}
+
+Point MidPoint(Point a,Point b)
+{
+	return Point((a.pos + b.pos)/2);
 }
 
 /*
@@ -489,7 +524,7 @@ int Entity::AddSkin(string path)
 	return skins.size() - 1;
 }
 
-void Entity::Draw(Position origin)
+void Entity::Draw(Position origin,COLORREF color)
 {
 	Position realPos = pos.RelToAbs(origin);
 	putimage(realPos.x, realPos.y, &skin);
