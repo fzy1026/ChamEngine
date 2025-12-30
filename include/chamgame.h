@@ -31,6 +31,7 @@ public:
 
 // 包围盒碰撞检测
 bool Crash(AABB a, AABB b);
+
 /*
 点类
 用于定义线类,以及传递坐标
@@ -38,17 +39,18 @@ bool Crash(AABB a, AABB b);
 class Point
 {
 public:
-	Matrix pos()
+	int x,y;
 	Point();
-	Point(int x, int y);
+	Point(int X, int Y);
 	AABB GetAABB();
+	void Set(int X,int Y);
 	void Draw(Point origin, COLORREF color = WHITE); // 相对坐标转绝对坐标绘制
 	void Move(Point delta);
 	void Move(int dx, int dy);
-	void MoveTo(Point newPos);
-	void MoveTo(int x, int y);
 	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
 	void Zoom(Point center, double scale);	// 以center为中心缩放scale倍
+	Point AbsToRel(Point origin);//相对坐标转绝对坐标
+	Point RelToAbs(Point origin);//绝对坐标转相对坐标
 };
 
 double Distance(Point a, Point b);
@@ -116,11 +118,9 @@ public:
 	IMAGE image;
 	int height, width;
 	Point pos; // 绘制位置(相对坐标)
-	Image(string Address, int Height = 0, int Width = 0, Point Pos = Point(0, 0));
-	Image(string Address, int Height = 0, int Width = 0, int x = 0, int y = 0);
+	Image(string Address, int Height = 0, int Width = 0);
 	void SetSize(int Height, int Width);
 	void Draw(Point origin, DWORD dwrop = SRCCOPY); // 相对坐标转绝对坐标绘制
-	void Move(Point delta);
 	void Move(int dx, int dy);
 	void MoveTo(Point newPos);
 	void MoveTo(int x, int y);
@@ -143,7 +143,7 @@ public:
 	Shape GetCrashBox();
 	void SetSkin(int index);
 	void DelSkin(int index);
-	int AddSkin(IMAGE img);
+	int AddSkin(Image img);
 	int AddSkin(string path);
 	void Draw(Point origin, COLORREF color = WHITE); // 相对坐标转绝对坐标绘制
 	void Move(Point delta);

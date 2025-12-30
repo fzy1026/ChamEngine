@@ -2,18 +2,18 @@
 #define CHAMMATH_H
 #include <bits/stdc++.h>
 #include <unistd.h>
+using namespace std;
 
 const double PI = 3.1415926535897932384626;
-
 class Matrix
 {
     public:
     int hight,width;
-    double **data;
-    Matrix(int H,int W,double **Vals= nullptr);
+    vector<vector<double>> data;
+    Matrix(int H,int W);
     void SetZero();
     void SetIdentity();
-    bool Set(int x,int y,int val);
+    bool Set(int x,int y,double val);
     double Get(int x,int y);
     Matrix operator+(const Matrix &a) const;
     Matrix operator*(const Matrix &a) const;

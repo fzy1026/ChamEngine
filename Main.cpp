@@ -1,7 +1,9 @@
-#include "include/chamtool.h"
 #include "include/chamgame.h"
 #include <vector>
 #include <iostream>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -15,7 +17,7 @@ int main() {
 	entity.Draw(Point(0, 480));
 
 	// 按任意键退出
-	getch();
+	system("pause");
 	closegraph();
 
 	return 0;

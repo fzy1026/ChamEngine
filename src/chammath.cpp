@@ -4,22 +4,10 @@ using namespace std;
 
 
 
-Matrix::Matrix(int H, int W, double **Vals)
+Matrix::Matrix(int H, int W)
 {
     hight = H;
     width = W;
-    data = new double *[hight];
-    for (int i = 0; i < hight; i++)
-    {
-        data[i] = new double[width];
-        for (int j = 0; j < width; j++)
-        {
-            if (Vals != nullptr && Vals[i] != nullptr)
-                data[i][j] = Vals[i][j];
-            else
-                data[i][j] = 0;
-        }
-    }
 }
 
 void Matrix::SetZero()
@@ -42,7 +30,7 @@ void Matrix::SetIdentity()
     }
 }
 
-bool Matrix::Set(int x, int y, int val)
+bool Matrix::Set(int x, int y, double val)
 {
     if (IsInRange(x, 0, hight - 1) && IsInRange(y, 0, width - 1))
     {

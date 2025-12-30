@@ -2,93 +2,7 @@
 #include "../include/chammath.h"
 using namespace std;
 
-// 位置类
-/*
-方便传递位置坐标用的工具类
-*/
 
-Point::Point(int X, int Y)
-{
-	x = X;
-	y = Y;
-}
-
-void Point::Set(int X, int Y)
-{
-	x = X;
-	y = Y;
-}
-
-Point Point::operator+(const Point &p) const
-{
-	return Point(x + p.x, y + p.y);
-}
-
-Point Point::operator-(const Point &p) const
-{
-	return Point(x - p.x, y - p.y);
-}
-
-Point Point::RelToAbs(Point origin)
-{
-	return Point(origin.x + x, origin.y - y);
-}
-
-Point Point::AbsToRel(Point origin)
-{
-	return Point(x - origin.x, y - origin.y);
-}
-
-Point Point::operator*(const int &p) const
-{
-	return Point(x * p, y * p);
-}
-
-Point Point::operator*(const long &p) const
-{
-	return Point(x * p, y * p);
-}
-
-Point Point::operator*(const long long &p) const
-{
-	return Point(x * p, y * p);
-}
-
-Point Point::operator/(const int &p) const
-{
-	return Point(x / p, y / p);
-}
-
-Point Point::operator/(const long &p) const
-{
-	return Point(x / p, y / p);
-}
-
-Point Point::operator/(const long long &p) const
-{
-	return Point(x / p, y / p);
-}
-
-Point Point::Rotate(Point center, double angle)
-{
-	double a = atan2(y - center.y, x - center.x);
-	a += angle;
-	double r = Distance(*this, center);
-	return Point(center.x + r * cos(a), center.y + r * sin(a));
-}
-
-Point Point::Zoom(Point center, double scale)
-{
-	double a = atan2(y - center.y, x - center.x);
-	double r = Distance(*this, center);
-	r *= scale;
-	return Point(center.x + r * cos(a), center.y + r * sin(a));
-}
-
-double Distance(Point a, Point b)
-{
-	return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
-}
 
 AABB::AABB(int MinX, int MaxX, int MinY, int MaxY)
 {
@@ -130,70 +44,81 @@ bool Crash(AABB a, AABB b)
 */
 Point::Point()
 {
-	pos.Set(0, 0);
+	x = 0;
+	y = 0;
 }
 
-Point::Point(int x, int y)
+Point::Point(int X, int Y)
 {
-	pos.Set(x, y);
+	x = X;
+	y = Y;
 }
 
-Point::Point(Point p)
-{
-	pos = p;
-}
 
 void Point::Draw(Point origin, COLORREF color) // 相对坐标转绝对坐标绘制
 {
 	setlinecolor(color);
 	setfillcolor(color);
-	fillcircle(origin.x + pos.x, origin.y - pos.y, 2);
+	fillcircle(origin.x + x, origin.y - y, 2);
 }
 
 AABB Point::GetAABB()
 {
-	return AABB(pos.x, pos.x, pos.y, pos.y);
+	return AABB(x,x,y,y);
 }
 
 void Point::Move(Point delta)
 {
-	pos = pos + delta;
+	x += delta.x;
+	y += delta.y;
 }
 
 void Point::Move(int dx, int dy)
 {
-	Point delta(dx, dy);
-	Move(delta);
+	x += dx;
+	y += dy;
 }
 
-void Point::MoveTo(Point newPos)
+void Point::Set(int X,int Y)
 {
-	pos = newPos;
-}
-
-void Point::MoveTo(int x, int y)
-{
-	pos.Set(x, y);
+	x = X;
+	y = Y;
 }
 
 void Point::Rotate(Point center, double angle) // 以center为中心逆时针旋转angle弧度
 {
-	pos.Rotate(center, angle);
+	double a = atan2(y - center.y, x - center.x);
+	a += angle;
+	double r = Distance(*this, center);
+	Set(center.x + r * cos(a), center.y + r * sin(a));
 }
 
 void Point::Zoom(Point center, double scale) // 以center为中心缩放scale倍
 {
-	pos.Zoom(center, scale);
+	double a = atan2(y - center.y, x - center.x);
+	double r = Distance(*this, center);
+	r *= scale;
+	Set(center.x + r * cos(a), center.y + r * sin(a));
+}
+
+Point Point::RelToAbs(Point origin)
+{
+	return Point(origin.x + x, origin.y - y);
+}
+
+Point Point::AbsToRel(Point origin)
+{
+	return Point(x - origin.x, y - origin.y);
 }
 
 double Distance(Point a, Point b)
 {
-	return Distance(a.pos, b.pos);
+	return sqrt(pow(a.x - b.x,2) + pow(a.y - b.y,2));
 }
 
 Point MidPoint(Point a, Point b)
 {
-	return Point((a.pos + b.pos) / 2);
+	return Point((a.x+b.x)/2,(a.y+b.y)/2);
 }
 
 /*
@@ -211,8 +136,8 @@ Line::Line(Point A, Point B) // 作为直线构建
 Line::Line(Point C, double StartAngle, double EndAngle, double r) // 作为圆弧角度构建
 {
 	center = C;
-	a = Point(C.pos.x + r * cos(StartAngle), C.pos.y + r * sin(StartAngle));
-	b = Point(C.pos.x + r * cos(EndAngle), C.pos.y + r * sin(EndAngle));
+	a = Point(C.x + r * cos(StartAngle), C.y + r * sin(StartAngle));
+	b = Point(C.x + r * cos(EndAngle), C.y + r * sin(EndAngle));
 	type = 1;
 }
 
@@ -251,19 +176,19 @@ void Line::Draw(Point origin, COLORREF color)
 	setlinecolor(color);
 	if (type == 0)
 	{
-		Point realA = a.pos.RelToAbs(origin);
-		Point realB = b.pos.RelToAbs(origin);
+		Point realA = a.RelToAbs(origin);
+		Point realB = b.RelToAbs(origin);
 		line(realA.x, realA.y, realB.x, realB.y);
 	}
 	else
 	{
-		double r = sqrt(pow(a.pos.x - center.pos.x, 2) + pow(a.pos.y - center.pos.y, 2));
-		double stangle = atan2(a.pos.y - center.pos.y, a.pos.x - center.pos.x);
-		double endangle = atan2(b.pos.y - center.pos.y, b.pos.x - center.pos.x);
+		double r = sqrt(pow(a.x - center.x, 2) + pow(a.y - center.y, 2));
+		double stangle = atan2(a.y - center.y, a.x - center.x);
+		double endangle = atan2(b.y - center.y, b.x - center.x);
 		while (endangle < stangle)
 			endangle += 2 * PI;
-		Point bottom_left = Point(center.pos.x - r, center.pos.y - r).RelToAbs(origin);
-		Point top_right = Point(center.pos.x + r, center.pos.y + r).RelToAbs(origin);
+		Point bottom_left = Point(center.x - r, center.y - r).RelToAbs(origin);
+		Point top_right = Point(center.x + r, center.y + r).RelToAbs(origin);
 		arc(bottom_left.x, top_right.y, top_right.x, bottom_left.y, stangle, endangle);
 	}
 }
@@ -272,7 +197,7 @@ double Line::Radius()
 {
 	if (type == 1)
 	{
-		return sqrt(pow(a.pos.x - center.pos.x, 2) + pow(a.pos.y - center.pos.y, 2));
+		return sqrt(pow(a.x - center.x, 2) + pow(a.y - center.y, 2));
 	}
 	else
 	{
@@ -300,17 +225,17 @@ AABB Line::GetAABB()
 {
 	if (type == 0)
 	{
-		int minX = std::min(a.pos.x, b.pos.x);
-		int maxX = std::max(a.pos.x, b.pos.x);
-		int minY = std::min(a.pos.y, b.pos.y);
-		int maxY = std::max(a.pos.y, b.pos.y);
+		int minX = std::min(a.x, b.x);
+		int maxX = std::max(a.x, b.x);
+		int minY = std::min(a.y, b.y);
+		int maxY = std::max(a.y, b.y);
 		return AABB(minX, maxX, minY, maxY);
 	}
 	else
 	{
 		int r = Distance(center, a);
-		double stangle = atan2(a.pos.y - center.pos.y, a.pos.x - center.pos.x);
-		double endangle = atan2(b.pos.y - center.pos.y, b.pos.x - center.pos.x);
+		double stangle = atan2(a.y - center.y, a.x - center.x);
+		double endangle = atan2(b.y - center.y, b.x - center.x);
 		while (endangle < stangle)
 			endangle += 2 * PI;
 		AABB ans;
@@ -321,7 +246,7 @@ AABB Line::GetAABB()
 		{
 			if (AngleIsInRange(angles[i], stangle, endangle))
 			{
-				ans = ans + Point(center.pos.x + r * cos(angles[i]), center.pos.y + r * sin(angles[i])).GetAABB();
+				ans = ans + Point(center.x + r * cos(angles[i]), center.y + r * sin(angles[i])).GetAABB();
 			}
 		}
 		return ans;
@@ -334,9 +259,9 @@ double *Line::Paramater()
 	{
 		// l: Ax + By + C = 0
 		double *params = new double[3];
-		double A = b.pos.y - a.pos.y;
-		double B = a.pos.x - b.pos.x;
-		double C = b.pos.x * a.pos.y - a.pos.x * b.pos.y;
+		double A = b.y - a.y;
+		double B = a.x - b.x;
+		double C = b.x * a.y - a.x * b.y;
 		params[0] = A;
 		params[1] = B;
 		params[2] = C;
@@ -357,11 +282,11 @@ double Distance(Line l, Point p) // 点与直线/圆周距离
 		double A = para[0];
 		double B = para[1];
 		double C = para[2];
-		return abs(A * p.pos.x + B * p.pos.y + C) / sqrt(A * A + B * B);
+		return abs(A * p.x + B * p.y + C) / sqrt(A * A + B * B);
 	}
 	else
 	{
-		return abs(Distance(l.center.pos, p.pos) - l.Radius());
+		return abs(Distance(l.center, p) - l.Radius());
 	}
 }
 
@@ -371,14 +296,14 @@ bool Line::Contains(Point p)
 		return false;
 	if (type == 0)
 	{
-		return IsInRange(p.pos.x, std::min(a.pos.x, b.pos.x), std::max(a.pos.x, b.pos.x)) &&
-			   IsInRange(p.pos.y, std::min(a.pos.y, b.pos.y), std::max(a.pos.y, b.pos.y));
+		return IsInRange(p.x, std::min(a.x, b.x), std::max(a.x, b.x)) &&
+			   IsInRange(p.y, std::min(a.y, b.y), std::max(a.y, b.y));
 	}
 	else
 	{
 		if (Distance(p, center) != Distance(a, center))
 			return 0;
-		double angleP = atan2(p.pos.y - center.pos.y, p.pos.x - center.pos.x);
+		double angleP = atan2(p.y - center.y, p.x - center.x);
 		return AngleContains(angleP);
 	}
 }
@@ -389,8 +314,8 @@ bool Line::AngleContains(double angle)
 		throw "Stright line can't run AngleContains()";
 	else
 	{
-		double stangle = atan2(a.pos.y - center.pos.y, a.pos.x - center.pos.x);
-		double endangle = atan2(b.pos.y - center.pos.y, b.pos.x - center.pos.x);
+		double stangle = atan2(a.y - center.y, a.x - center.x);
+		double endangle = atan2(b.y - center.y, b.x - center.x);
 		return AngleIsInRange(angle, stangle, endangle);
 	}
 }
@@ -404,7 +329,8 @@ Point Line::Projection(Point p)
 		double *para = Paramater();
 		double A = para[0], B = para[1], C = para[2];
 		double Px = p.x - A * (A * p.x + B * p.y + C) / (A * A + B * B);
-		double Px = p.x - A * (A * p.x + B * p.y + C) / (A * A + B * B);
+		double Py = p.x - A * (A * p.x + B * p.y + C) / (A * A + B * B);
+		return Point(Px,Py);
 	}
 }
 
@@ -440,12 +366,12 @@ bool Crash(Line a, Line b)
 		}
 		else if (a.type == 1 && b.type == 1)
 		{
-			if (Distance(a.center.pos, b.center.pos) > a.Radius() + b.Radius())
+			if (Distance(a.center, b.center) > a.Radius() + b.Radius())
 			{
 				return false;
 			}
-			double ang_ab = atan2(b.center.pos.y - a.center.pos.y, b.center.pos.x - a.center.pos.x);
-			return a.AngleContains(ang_ab) && b.AngleContains(ang + ab + PI);
+			double ang_ab = atan2(b.center.y - a.center.y, b.center.x - a.center.x);
+			return a.AngleContains(ang_ab) && b.AngleContains(ang_ab + PI);
 		}
 		else
 		{
@@ -516,9 +442,8 @@ bool Crash(Shape a, Shape b)
 	return Crash(A, B);
 }
 
-Image::Image(string Address, int Height, int Width, Point Pos)
+Image::Image(string Address, int Height, int Width)
 {
-	pos = Pos;
 	address = Address;
 	height = Height;
 	width = Width;
@@ -543,10 +468,6 @@ void Image::Draw(Point origin, DWORD dwrop)
 	putimage(absorbPos.x, absorbPos.y, &image, dwrop);
 }
 
-void Image ::Move(Point delta)
-{
-	pos = pos + delta;
-}
 
 void Image ::Move(int dx, int dy)
 {
@@ -617,7 +538,7 @@ void Entity::DelSkin(int index)
 	}
 }
 
-int Entity::AddSkin(IMAGE img)
+int Entity::AddSkin(Image img)
 {
 	skins.push_back(img);
 	return skins.size() - 1;
@@ -625,8 +546,7 @@ int Entity::AddSkin(IMAGE img)
 
 int Entity::AddSkin(string path)
 {
-	IMAGE img;
-	loadimage(&img, (LPCSTR)path.c_str());
+	Image img(path);
 	skins.push_back(img);
 	return skins.size() - 1;
 }
@@ -634,13 +554,14 @@ int Entity::AddSkin(string path)
 void Entity::Draw(Point origin, COLORREF color)
 {
 	Point realPos = pos.RelToAbs(origin);
-	putimage(realPos.x, realPos.y, &skins[skinIndex]);
+	putimage(realPos.x, realPos.y, &(CurrentSkin()->image));
 }
 
-Image Entity::*CurrentSkin()
+Image* Entity::CurrentSkin()
 {
-	return &skins[skinIndex];
+	return &(skins[skinIndex]);
 }
+
 
 bool Crash(Entity a, Entity b)
 {
