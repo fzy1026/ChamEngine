@@ -1,5 +1,7 @@
 
 #include "../include/chammath.h"
+using namespace std;
+
 
 
 Matrix::Matrix(int H, int W, double **Vals)
@@ -12,7 +14,7 @@ Matrix::Matrix(int H, int W, double **Vals)
         data[i] = new double[width];
         for (int j = 0; j < width; j++)
         {
-            if (Vals != NULL && Vals[i] != NULL)
+            if (Vals != nullptr && Vals[i] != nullptr)
                 data[i][j] = Vals[i][j];
             else
                 data[i][j] = 0;
@@ -349,3 +351,85 @@ bool MatrixMultipliable(const Matrix &a, const Matrix &b)
 {
     return a.width == b.hight;
 }
+
+int RAND()
+{
+	return rand() * RAND_MAX + rand();
+}
+
+
+//生成[min,max]范围内，步长为Div的随机数
+double Rand(double Min, double Max, double Div)
+{
+	int nmin = floor(Min / Div);
+	int nmax = floor(Max / Div);
+	return double(RAND() % (nmax - nmin + 1) + nmin) * Div;
+}
+
+
+bool IsInRange(double x, double L, double R, bool HL, bool HR)
+{
+	if (L > R)
+	{
+        swap(L, R);
+		swap(HL, HR);
+	}
+
+	bool ans = 1;
+
+	if (HL)
+		ans = ans && x >= L;
+	else
+		ans = ans && x > L;
+
+	if (HR)
+		ans = ans && x <= R;
+	else
+		ans = ans && x < R;
+
+	return ans;
+}
+
+bool AngleIsInRange(double x, double L, double R, bool HL, bool HR)
+{
+	while(R < L)
+		R += 2 * PI;
+	while(R - L > 2*PI)
+		R -= 2 * PI;
+	while (x < L)
+		x += 2 * PI;
+	while(x - 2*PI > L)
+		x -= 2 * PI;
+	bool ans = 1;
+	if(HL)
+		ans = ans && x >= L;
+	else
+		ans = ans && x > L;
+	if(HR)
+		ans = ans && x <= R;
+	else
+		ans = ans && x < R;
+
+	return ans;
+}
+
+bool Equal(double a, double b, double eps)
+{
+	return fabs(a - b) < eps;
+}
+
+bool Equal(float a, float b, float eps)
+{
+	return fabs(a - b) < eps;
+}
+
+bool EqualZero(double a, double eps)
+{
+	return fabs(a) < eps;
+}
+
+bool EqualZero(float a, float eps)
+{
+	return fabs(a) < eps;
+}
+

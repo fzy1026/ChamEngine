@@ -8,12 +8,11 @@ using namespace std;
 
 int main() {
 	initgraph(640, 480);
-	Position o(0,480);
+	Point o(0,480);
 	Entity entity;
 	entity.SetPosition(100, 100);
 	entity.SetSkin(entity.AddSkin("resources\\images\\test.png"));
-	entity.skin.Resize(100,100);
-	entity.Draw(Position(0, 480));
+	entity.Draw(Point(0, 480));
 
 	// 按任意键退出
 	getch();
