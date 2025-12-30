@@ -85,6 +85,9 @@ public:
 	void Zoom(Point center, double scale);	// 以center为中心缩放scale倍
 	bool AngleContains(double angle);//某个角度是否被包含在弧线中
 	Point Projection(Point p);//p点在直线上的投影
+	double Angle();//线段方位角(与X轴夹角)
+	double StartAngle();//圆弧起始角
+	double EndAngle();//圆弧中止角
 };
 
 double Distance(Line l, Point p); // 点与直线/圆周距离

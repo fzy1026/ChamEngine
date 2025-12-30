@@ -135,6 +135,8 @@ Line::Line(Point A, Point B) // 作为直线构建
 
 Line::Line(Point C, double StartAngle, double EndAngle, double r) // 作为圆弧角度构建
 {
+	if(EndAngle < StartAngle)
+		swap(StartAngle,EndAngle);
 	center = C;
 	a = Point(C.x + r * cos(StartAngle), C.y + r * sin(StartAngle));
 	b = Point(C.x + r * cos(EndAngle), C.y + r * sin(EndAngle));
@@ -334,6 +336,36 @@ Point Line::Projection(Point p)
 	}
 }
 
+double Line::Angle()
+{
+	if(type)
+		throw "arc can't use Angle()";
+	else
+	{
+		return atan2(b.y - a.y,b.x - a.x);
+	}
+}
+
+double Line::StartAngle()
+{
+	if(!type)
+		throw "stright line can't use StartAngle()";
+	else
+	{
+		return atan2(a.y - center.y,a.x - center.x);
+	}
+}
+
+double Line::EndAngle()
+{
+	if(!type)
+		throw "stright line can't use EndAngle()";
+	else
+	{
+		return atan2(b.y - center.y,b.x - center.x);
+	}
+}
+
 bool Crash(Line a, Line b)
 {
 	AABB A = a.GetAABB();
@@ -377,13 +409,13 @@ bool Crash(Line a, Line b)
 		{
 			if (a.type)
 			{
-				swap(a, b); // a为直线，b为圆弧
+				swap(a, b); 
 			}
+			// a为直线，b为圆弧
 			if (Distance(a, b.center) > b.Radius())
 				return 0;
-
-			// TODO: 直线与圆弧碰撞检测
-			return false;
+			Line La(b.center,a.a),Lb(b.center,a.b);//从圆心向两端点连线
+			return AngleIntersects(La.Angle(),Lb.Angle(),b.StartAngle(),b.EndAngle());
 		}
 	}
 }

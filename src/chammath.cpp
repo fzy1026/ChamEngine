@@ -421,3 +421,25 @@ bool EqualZero(float a, float eps)
 	return fabs(a) < eps;
 }
 
+bool AngleIntersects(double AStartAng,double AEndAng,double BStartAng,double BEndAng)//检测两个角是否有重合部分
+{
+    if(AStartAng > AEndAng)
+        swap(AStartAng,AEndAng);
+    if(BStartAng > BEndAng)
+        swap(BStartAng,BEndAng);
+    while(!IsInRange(AStartAng - BStartAng,0,2*PI,1,0))
+    {
+        if(BStartAng > AStartAng)
+        {
+            BStartAng-=2*PI;
+            BEndAng -= 2*PI;
+        }
+        else
+        {
+            BStartAng += 2*PI;
+            BEndAng += 2*PI;
+        }
+    }
+    return IsInRange(BStartAng,AStartAng,AEndAng);
+}
+

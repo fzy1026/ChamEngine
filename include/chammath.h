@@ -46,7 +46,7 @@ int RAND();//生成范围为原版平方的大随机数
 double Rand(double Min, double Max, double Div = 1);//生成[min,max]范围内，步长为Div的随机数
 
 
-bool IsInRange(double x, double L, double R, bool HL = true, bool HR = true);//判断某数是否属于某区间
+bool IsInRange(double x, double L, double R, bool HL = true, bool HR = true);//判断某数是否属于某区间,
 
 bool AngleIsInRange(double x, double L, double R, bool HL = true, bool HR = true);//判断某角度是否属于某角度区间
 
@@ -57,6 +57,8 @@ bool Equal(float a, float b, float eps = 1e-6f);
 bool EqualZero(double a, double eps = 1e-6);//浮点数判0
 
 bool EqualZero(float a, float eps = 1e-6f);
+
+bool AngleIntersects(double AStartAng,double AEndAng,double BStartAng,double BEndAng);//检测两个角是否有重合部分
 
 
 #endif // CHAMMATH_H
