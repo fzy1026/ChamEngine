@@ -168,6 +168,7 @@ class Scene
 {
 private:
 	int height, width;
+	double scale;//场景放缩比例
 	Point origin; // 原点在EasyX的绝对坐标
 
 public:

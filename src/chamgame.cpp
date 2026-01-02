@@ -471,7 +471,20 @@ bool Crash(Shape a, Shape b)
 {
 	AABB A = a.GetAABB();
 	AABB B = b.GetAABB();
-	return Crash(A, B);
+	if(!Crash(A,B))
+		return 0;
+	else
+	{
+		for(int i=0;i<a.lines.size();i++)
+		{
+			for(int j = 0;j<b.lines.size();j++)
+			{
+				if(crash(a.lines[i],b.lines[j]))
+				 	return 1;
+			}
+		}
+		return 0;
+	}
 }
 
 Image::Image(string Address, int Height, int Width)
