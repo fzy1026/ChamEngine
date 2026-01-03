@@ -2,8 +2,6 @@
 #include "../include/chammath.h"
 using namespace std;
 
-
-
 AABB::AABB(int MinX, int MaxX, int MinY, int MaxY)
 {
 	minX = MinX;
@@ -14,7 +12,7 @@ AABB::AABB(int MinX, int MaxX, int MinY, int MaxY)
 
 AABB AABB::operator+(const AABB &a) const
 {
-	return AABB(std::min(minX, a.minX),std::max(maxX, a.maxX), std::min(minY, a.minY), std::max(maxY, a.maxY));
+	return AABB(std::min(minX, a.minX), std::max(maxX, a.maxX), std::min(minY, a.minY), std::max(maxY, a.maxY));
 } // 包围盒合并运算
 
 AABB AABB::operator+(const Point &p) const
@@ -54,7 +52,6 @@ Point::Point(int X, int Y)
 	y = Y;
 }
 
-
 void Point::Draw(Point origin, COLORREF color) // 相对坐标转绝对坐标绘制
 {
 	setlinecolor(color);
@@ -64,7 +61,7 @@ void Point::Draw(Point origin, COLORREF color) // 相对坐标转绝对坐标绘
 
 AABB Point::GetAABB()
 {
-	return AABB(x,x,y,y);
+	return AABB(x, x, y, y);
 }
 
 void Point::Move(Point delta)
@@ -79,7 +76,7 @@ void Point::Move(int dx, int dy)
 	y += dy;
 }
 
-void Point::Set(int X,int Y)
+void Point::Set(int X, int Y)
 {
 	x = X;
 	y = Y;
@@ -113,12 +110,12 @@ Point Point::AbsToRel(Point origin)
 
 double Distance(Point a, Point b)
 {
-	return sqrt(pow(a.x - b.x,2) + pow(a.y - b.y,2));
+	return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
 }
 
 Point MidPoint(Point a, Point b)
 {
-	return Point((a.x+b.x)/2,(a.y+b.y)/2);
+	return Point((a.x + b.x) / 2, (a.y + b.y) / 2);
 }
 
 /*
@@ -135,8 +132,8 @@ Line::Line(Point A, Point B) // 作为直线构建
 
 Line::Line(Point C, double StartAngle, double EndAngle, double r) // 作为圆弧角度构建
 {
-	if(EndAngle < StartAngle)
-		swap(StartAngle,EndAngle);
+	if (EndAngle < StartAngle)
+		swap(StartAngle, EndAngle);
 	center = C;
 	a = Point(C.x + r * cos(StartAngle), C.y + r * sin(StartAngle));
 	b = Point(C.x + r * cos(EndAngle), C.y + r * sin(EndAngle));
@@ -332,37 +329,37 @@ Point Line::Projection(Point p)
 		double A = para[0], B = para[1], C = para[2];
 		double Px = p.x - A * (A * p.x + B * p.y + C) / (A * A + B * B);
 		double Py = p.x - A * (A * p.x + B * p.y + C) / (A * A + B * B);
-		return Point(Px,Py);
+		return Point(Px, Py);
 	}
 }
 
 double Line::Angle()
 {
-	if(type)
+	if (type)
 		throw "arc can't use Angle()";
 	else
 	{
-		return atan2(b.y - a.y,b.x - a.x);
+		return atan2(b.y - a.y, b.x - a.x);
 	}
 }
 
 double Line::StartAngle()
 {
-	if(!type)
+	if (!type)
 		throw "stright line can't use StartAngle()";
 	else
 	{
-		return atan2(a.y - center.y,a.x - center.x);
+		return atan2(a.y - center.y, a.x - center.x);
 	}
 }
 
 double Line::EndAngle()
 {
-	if(!type)
+	if (!type)
 		throw "stright line can't use EndAngle()";
 	else
 	{
-		return atan2(b.y - center.y,b.x - center.x);
+		return atan2(b.y - center.y, b.x - center.x);
 	}
 }
 
@@ -409,13 +406,13 @@ bool Crash(Line a, Line b)
 		{
 			if (a.type)
 			{
-				swap(a, b); 
+				swap(a, b);
 			}
 			// a为直线，b为圆弧
 			if (Distance(a, b.center) > b.Radius())
 				return 0;
-			Line La(b.center,a.a),Lb(b.center,a.b);//从圆心向两端点连线
-			return AngleIntersects(La.Angle(),Lb.Angle(),b.StartAngle(),b.EndAngle());
+			Line La(b.center, a.a), Lb(b.center, a.b); // 从圆心向两端点连线
+			return AngleIntersects(La.Angle(), Lb.Angle(), b.StartAngle(), b.EndAngle());
 		}
 	}
 }
@@ -451,7 +448,7 @@ void Shape::Draw(Point origin, COLORREF color)
 	}
 }
 
-void Shape::Rotate(Point centerPoint, double angle) // 以centerPoint为中心逆时针旋转angle弧度
+void Shape::Rotate(Point centerPoint, double angle)
 {
 	for (size_t i = 0; i < lines.size(); i++)
 	{
@@ -459,7 +456,7 @@ void Shape::Rotate(Point centerPoint, double angle) // 以centerPoint为中心�
 	}
 }
 
-void Shape::Zoom(Point centerPoint, double scale) // 以centerPoint为中心缩放scale倍
+void Shape::Zoom(Point centerPoint, double scale)
 {
 	for (size_t i = 0; i < lines.size(); i++)
 	{
@@ -471,16 +468,16 @@ bool Crash(Shape a, Shape b)
 {
 	AABB A = a.GetAABB();
 	AABB B = b.GetAABB();
-	if(!Crash(A,B))
+	if (!Crash(A, B))
 		return 0;
 	else
 	{
-		for(int i=0;i<a.lines.size();i++)
+		for (int i = 0; i < a.lines.size(); i++)
 		{
-			for(int j = 0;j<b.lines.size();j++)
+			for (int j = 0; j < b.lines.size(); j++)
 			{
-				if(crash(a.lines[i],b.lines[j]))
-				 	return 1;
+				if (Crash(a.lines[i], b.lines[j]))
+					return 1;
 			}
 		}
 		return 0;
@@ -493,52 +490,50 @@ Image::Image(string Address, int Height, int Width)
 	height = Height;
 	width = Width;
 	loadimage(&image, Address.c_str(), Height, Width, true);
+	if(height * width == 0)
+	{
+		height = image.getheight();
+		width = image.getwidth();
+	}
 }
 
 void Image::SetSize(int Height, int Width)
 {
-	if (address == "")
-		throw "An Image without address can't set size.";
-	else
-	{
-		loadimage(&image, address.c_str(), Height, Width, true);
-		height = Height;
-		width = Width;
-	}
+	height = Height;
+	width = Width;
 }
 
-void Image::Draw(Point origin, DWORD dwrop)
+void Image::Draw(Point pos, DWORD dwrop)
 {
-	Point absorbPos = pos.RelToAbs(origin);
-	putimage(absorbPos.x, absorbPos.y, &image, dwrop);
+	putimage(pos.x, pos.y, &image, dwrop);
 }
 
-
-void Image ::Move(int dx, int dy)
+void Image::Rotate(double angle)
 {
-	pos = Point(pos.x + dx, pos.y + dy);
+	ang += angle;
 }
 
-void Image ::MoveTo(Point newPos)
+void Image::SetAng(double angle)
 {
-	pos = newPos;
+	ang = angle;
 }
 
-void Image ::MoveTo(int x, int y)
+void Image::Load()
 {
-	pos = Point(x, y);
+	loadimage(&image, address.c_str(), height, width, true);
+	rotateimage(&image, &image, ang, BLACK, true, true);
+	// TODO:图片旋转后空白部分填充问题
 }
 
-void Image::Rotate(Point center, double angle)
+void Image::SetAddress(string Address)
 {
-	pos.Rotate(center, angle);
-	rotateimage(&image, &image, angle, BLACK, true, true);
-	// TODO:图片旋转后空白位置处理
+	address = Address;
 }
 
-void Image::Zoom(Point center, double scale)
+void Image::Zoom(double scale)
 {
-	pos.Zoom(center, scale);
+	height *= scale;
+	width *= scale;
 }
 void Entity::SetPosition(int x, int y)
 {
@@ -596,77 +591,135 @@ int Entity::AddSkin(string path)
 	return skins.size() - 1;
 }
 
-void Entity::Draw(Point origin, COLORREF color)
+void Entity::Draw(Point origin)
 {
 	Point realPos = pos.RelToAbs(origin);
 	putimage(realPos.x, realPos.y, &(CurrentSkin()->image));
 }
 
-Image* Entity::CurrentSkin()
+void Entity::Move(int dx, int dy)
+{
+	pos.Move(dx, dy);
+}
+
+void Entity::MoveTo(Point newPos)
+{
+	pos = newPos;
+}
+
+void Entity::MoveTo(int x, int y)
+{
+	pos.Set(x, y);
+}
+
+void Entity::Zoom(Point origin, double scale)
+{
+	CrashBox.Zoom(Point(0, 0), scale);
+	pos.Zoom(origin, scale);
+	for (int i = 0; i < skins.size(); i++)
+	{
+		skins[i].Zoom(scale);
+		skins[i].Load();
+	}
+}
+
+void Entity::Rotate(Point origin, double arg)
+{
+	pos.Rotate(origin, arg);
+	CrashBox.Rotate(Point(0, 0), arg);
+	for (int i = 0; i < skins.size(); i++)
+	{
+		skins[i].Rotate(arg);
+	}
+}
+
+Image *Entity::CurrentSkin()
 {
 	return &(skins[skinIndex]);
 }
-
 
 bool Crash(Entity a, Entity b)
 {
 	return Crash(a.CrashBox, b.CrashBox);
 }
 
-Scene::Scene(int H, int W)
+Scene::Scene(Point p)
 {
-	height = H;
-	width = W;
-	origin.Set(0, 0);
+	origin = p;
+	maxPriority = 0;
 }
 
-int Scene::GetHeight()
+void Scene::SetOrigin(Point p)
 {
-	return height;
+	origin = p;
 }
 
-int Scene::GetWidth()
+int Scene::AddEntity(Entity *entity, int priority)
 {
-	return width;
-}
-
-int Scene::AddEntity(Entity *entity,int priority)
-{
-	pair<Entity*,int> p;
+	pair<Entity *, int> p;
 	p.first = entity;
 	p.second = priority;
 	entities.push_back(p);
-	return entities.size()-1;
+	maxPriority = maxPriority > priority ? maxPriority : priority;
+	return entities.size() - 1;
 }
 
 void Scene::DelEntity(int index)
 {
-	entities[index] = entities.back();//我的天哪AI大人。
-	entities.pop_back();
-}
-
-void Scene::SetEntity(Entity * entity,int index)
-{
-	entities[index].first = entity;
-}
-
-int Scene::GetIndex(Entity* entity)
-{
-	for(int i=0;i<entities.size();i++)
+	if (InRange(index, 0, entities.size() - 1))
 	{
-		if(entities[i].first == *entity)
+		entities[index] = entities.back();
+		entities.pop_back();
+		maxPriority = 0;
+		for (int i = 0; i < entities.size(); i++)
+		{
+			maxPriority = max(maxPriority, entities[i].second);
+		}
+	}
+}
+
+void Scene::SetEntity(Entity *entity, int index)
+{
+	if (InRange(index, 0, entities.size() - 1))
+		entities[index].first = entity;
+}
+
+int Scene::GetIndex(Entity *entity)
+{
+	for (int i = 0; i < entities.size(); i++)
+	{
+		if (entities[i].first == entity)
 			return i;
 	}
 	return -1;
 }
 
-void Scene::SetPriority(int p,int index)
+void Scene::SetPriority(int p, int index)
 {
-	if(InRange())
-	entities[index].second = p;
+	if (InRange(index, 0, entities.size() - 1))
+	{
+		entities[index].second = p;
+		maxPriority = maxPriority > p ? maxPriority : p;
+	}
 }
 
-void Scene::Draw(Entity entity)
+void Scene::Draw()
 {
-	
+	for (int i = maxPriority; i >= 0; i--)
+	{
+		for (int j = 0; j < entities.size(); j++)
+		{
+			if (entities[j].second == i)
+			{
+				Entity e = *(entities[j].first);
+				e.Zoom(Point(0, 0), scale);
+				e.Draw(origin);
+			}
+		}
+	}
+}
+
+void Scene::SetScale(double Scale)
+{
+	scale = Scale;
 }

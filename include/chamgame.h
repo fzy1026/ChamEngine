@@ -39,18 +39,18 @@ bool Crash(AABB a, AABB b);
 class Point
 {
 public:
-	int x,y;
+	int x, y;
 	Point();
 	Point(int X, int Y);
 	AABB GetAABB();
-	void Set(int X,int Y);
+	void Set(int X, int Y);
 	void Draw(Point origin, COLORREF color = WHITE); // 相对坐标转绝对坐标绘制
 	void Move(Point delta);
 	void Move(int dx, int dy);
 	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
-	void Zoom(Point center, double scale);	// 以center为中心缩放scale倍
-	Point AbsToRel(Point origin);//相对坐标转绝对坐标
-	Point RelToAbs(Point origin);//绝对坐标转相对坐标
+	void Zoom(Point center, double scale);	 // 以center为中心缩放scale倍
+	Point AbsToRel(Point origin);			 // 相对坐标转绝对坐标
+	Point RelToAbs(Point origin);			 // 绝对坐标转相对坐标
 };
 
 double Distance(Point a, Point b);
@@ -65,8 +65,8 @@ Point MidPoint(Point a, Point b);
 class Line
 {
 public:
-	Point a, b;	  // 线的两个端点
-	Point center; // 圆弧的圆心
+	Point a, b;	  // 线的两个端点(相对坐标)
+	Point center; // 圆弧的圆心(相对坐标)
 	bool type;	  // 0直线，1圆弧
 
 	Line(Point A, Point B);										 // 作为直线构建
@@ -75,24 +75,24 @@ public:
 	double *GetParameters();
 	AABB GetAABB();
 	bool Contains(Point p);
-	double *Paramater();//p[0]x+p[1]y+p[2]=0
-	void Draw(Point origin, COLORREF color = WHITE); // 相对坐标转绝对坐标绘制
+	double *Paramater();							 // p[0]x+p[1]y+p[2]=0
+	void Draw(Point origin, COLORREF color = WHITE); // 以origin为相对坐标系零点，转绝对坐标绘制
 	void Move(Point delta);
 	void Move(int dx, int dy);
 	void MoveTo(Point newPos);
 	void MoveTo(int x, int y);
-	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
-	void Zoom(Point center, double scale);	// 以center为中心缩放scale倍
-	bool AngleContains(double angle);//某个角度是否被包含在弧线中
-	Point Projection(Point p);//p点在直线上的投影
-	double Angle();//线段方位角(与X轴夹角)
-	double StartAngle();//圆弧起始角
-	double EndAngle();//圆弧中止角
+	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
+	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
+	bool AngleContains(double angle);		 // 某个角度是否被包含在弧线中
+	Point Projection(Point p);				 // p点在直线上的投影
+	double Angle();							 // 线段方位角(与X轴夹角)
+	double StartAngle();					 // 圆弧起始角
+	double EndAngle();						 // 圆弧中止角
 };
 
 double Distance(Line l, Point p); // 点与直线/圆周距离
 
-bool Crash(Line a, Line b);
+bool Crash(Line a, Line b); // 不建议使用这个函数,除非你确定他们处于同一坐标系下！
 
 class Shape
 {
@@ -102,16 +102,16 @@ public:
 	Shape(vector<Line> L);
 	Shape();
 	AABB GetAABB();
-	void Draw(Point origin, COLORREF color = WHITE); // 相对坐标转绝对坐标绘制
+	void Draw(Point origin, COLORREF color = WHITE); // 以origin为相对坐标系原点,转绝对坐标绘制
 	void Move(Point delta);
 	void Move(int dx, int dy);
 	void MoveTo(Point newPos);
 	void MoveTo(int x, int y);
-	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
-	void Zoom(Point center, double scale);	// 以center为中心缩放scale倍
+	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
+	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
 };
 
-bool Crash(Shape a, Shape b);
+bool Crash(Shape a, Shape b); // 不建议使用这个函数,除非你确定他们处于同一坐标系下！
 
 //
 class Image
@@ -120,15 +120,15 @@ public:
 	string address;
 	IMAGE image;
 	int height, width;
-	Point pos; // 绘制位置(相对坐标)
+	double ang; // 图片旋转的角度,保证重载后旋转状态不变
 	Image(string Address, int Height = 0, int Width = 0);
-	void SetSize(int Height, int Width);
-	void Draw(Point origin, DWORD dwrop = SRCCOPY); // 相对坐标转绝对坐标绘制
-	void Move(int dx, int dy);
-	void MoveTo(Point newPos);
-	void MoveTo(int x, int y);
-	void Rotate(Point center, double angle); // 逆时针旋转angle弧度
-	void Zoom(Point center, double scale);	// 以center为中心缩放scale倍
+	void SetSize(int Height, int Width);		 // 更改图片尺寸
+	void Load();								 // 按照当前尺寸与角度,从Address处加载图片
+	void SetAddress(string Address);			 // 更改加载地址
+	void Draw(Point pos, DWORD dwrop = SRCCOPY); // 在pos(绝对坐标)处绘制上一次Load的图片
+	void Rotate(double angle);					 // 逆时针旋转angle弧度
+	void SetAng(double angle);					 // 设置图片旋转角度
+	void Zoom(double scale);					 // 缩放scale倍
 };
 
 class Entity
@@ -137,7 +137,7 @@ public:
 	Shape CrashBox;
 	vector<Image> skins;
 	int skinIndex;
-	Point pos; // 实体原点(所有实体所包含的元素均以此点绝对坐标为原点)
+	Point pos; // 实体中心，实体的碰撞箱与皮肤均以pos为相对坐标系原点
 
 	void SetPosition(int x, int y);
 	void SetPosition(Point p);
@@ -148,14 +148,13 @@ public:
 	void DelSkin(int index);
 	int AddSkin(Image img);
 	int AddSkin(string path);
-	void Draw(Point origin, COLORREF color = WHITE); // 相对坐标转绝对坐标绘制
-	void Move(Point delta);
+	void Draw(Point origin); // 以origin为pos绝对坐标，转绝对坐标绘制
 	void Move(int dx, int dy);
 	void MoveTo(Point newPos);
 	void MoveTo(int x, int y);
-	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
-	void Zoom(Point center, double scale);	 // 以center为中心缩放scale倍
-	Image* CurrentSkin();
+	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
+	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
+	Image *CurrentSkin();
 };
 
 bool Crash(Entity a, Entity b);
@@ -166,25 +165,21 @@ bool Crash(Entity a, Entity b);
 */
 class Scene
 {
-private:
-	int height, width;
-	double scale;//场景放缩比例
-	Point origin; // 原点在EasyX的绝对坐标
-	vector<pair<Entity*,int>> entities;//场景所管理的实体，以及其对应的优先级
-	int maxPriority;//记录目前的最高优先级，美化用
-
 public:
-	Scene(int H = 600, int W = 800);
-	int GetHeight();
-	int GetWidth();
+	double scale;						  // 场景放缩比例
+	Point origin;						  // 原点在EasyX的绝对坐标
+	vector<pair<Entity *, int>> entities; // 场景所管理的实体，以及其对应的优先级
+	int maxPriority;					  // 记录目前的最高优先级
+	Scene(Point p = Point(0, 0));
 	void SetOrigin(Point p);
-	void Draw();//优先级高（相同时索引靠前）的实体先绘制
-	int AddEntity(Entity* entity,int priority = 0);//返回加入的实体（加在尾部）的索引
-	void SetEntity(Entity *entity,int index);//更改某索引对应的实体
-	void DelEntity(int index);//删除某索引对应的实体，这一操作可能导致其他实体索引更改！
-	int GetIndex(Entity *entity);//查找实体对应索引,-1代表未找到
-	void SetPriority(int p,int index);
-	//TODO:查找部分也许可以加优化....?
+	void Draw();									 // 优先级高（相同时索引靠前）的实体先绘制
+	int AddEntity(Entity *entity, int priority = 0); // 返回加入的实体（加在尾部）的索引
+	void SetEntity(Entity *entity, int index);		 // 更改某索引对应的实体
+	void DelEntity(int index);						 // 删除某索引对应的实体，这一操作可能导致其他实体索引更改！
+	int GetIndex(Entity *entity);					 // 查找实体对应索引,-1代表未找到
+	void SetPriority(int p, int index);				 // 设置某实体优先级
+	void SetScale(double Scale);
+	// TODO:查找部分也许可以加优化....?
 };
 
 #endif
