@@ -32,7 +32,7 @@ void Matrix::SetIdentity()
 
 bool Matrix::Set(int x, int y, double val)
 {
-    if (IsInRange(x, 0, hight - 1) && IsInRange(y, 0, width - 1))
+    if (InRange(x, 0, hight - 1) && InRange(y, 0, width - 1))
     {
         data[x][y] = val;
         return 1;
@@ -42,7 +42,7 @@ bool Matrix::Set(int x, int y, double val)
 
 double Matrix::Get(int x, int y)
 {
-    if (IsInRange(x, 0, hight - 1) && IsInRange(y, 0, width - 1))
+    if (InRange(x, 0, hight - 1) && InRange(y, 0, width - 1))
     {
         return data[x][y];
     }
@@ -218,7 +218,7 @@ Matrix Matrix::operator/(const long long &a) const
 
 Matrix Matrix::SubMatrix(int x, int y)
 {
-    if (hight <= 1 || width <= 1 || !IsInRange(x, 0, hight - 1) || !IsInRange(y, 0, width - 1))
+    if (hight <= 1 || width <= 1 || !InRange(x, 0, hight - 1) || !InRange(y, 0, width - 1))
     {
         throw "Error: Cannot get submatric.";
     }
@@ -355,7 +355,7 @@ double Rand(double Min, double Max, double Div)
 }
 
 
-bool IsInRange(double x, double L, double R, bool HL, bool HR)
+bool InRange(double x, double L, double R, bool HL, bool HR)
 {
 	if (L > R)
 	{
@@ -427,7 +427,7 @@ bool AngleIntersects(double AStartAng,double AEndAng,double BStartAng,double BEn
         swap(AStartAng,AEndAng);
     if(BStartAng > BEndAng)
         swap(BStartAng,BEndAng);
-    while(!IsInRange(AStartAng - BStartAng,0,2*PI,1,0))
+    while(!InRange(AStartAng - BStartAng,0,2*PI,1,0))
     {
         if(BStartAng > AStartAng)
         {
@@ -440,6 +440,6 @@ bool AngleIntersects(double AStartAng,double AEndAng,double BStartAng,double BEn
             BEndAng += 2*PI;
         }
     }
-    return IsInRange(BStartAng,AStartAng,AEndAng);
+    return InRange(BStartAng,AStartAng,AEndAng);
 }
 

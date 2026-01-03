@@ -170,12 +170,21 @@ private:
 	int height, width;
 	double scale;//场景放缩比例
 	Point origin; // 原点在EasyX的绝对坐标
+	vector<pair<Entity*,int>> entities;//场景所管理的实体，以及其对应的优先级
+	int maxPriority;//记录目前的最高优先级，美化用
 
 public:
 	Scene(int H = 600, int W = 800);
 	int GetHeight();
 	int GetWidth();
-	void Draw();
+	void SetOrigin(Point p);
+	void Draw();//优先级高（相同时索引靠前）的实体先绘制
+	int AddEntity(Entity* entity,int priority = 0);//返回加入的实体（加在尾部）的索引
+	void SetEntity(Entity *entity,int index);//更改某索引对应的实体
+	void DelEntity(int index);//删除某索引对应的实体，这一操作可能导致其他实体索引更改！
+	int GetIndex(Entity *entity);//查找实体对应索引,-1代表未找到
+	void SetPriority(int p,int index);
+	//TODO:查找部分也许可以加优化....?
 };
 
 #endif

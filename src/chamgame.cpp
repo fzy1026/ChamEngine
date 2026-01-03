@@ -298,8 +298,8 @@ bool Line::Contains(Point p)
 		return false;
 	if (type == 0)
 	{
-		return IsInRange(p.x, std::min(a.x, b.x), std::max(a.x, b.x)) &&
-			   IsInRange(p.y, std::min(a.y, b.y), std::max(a.y, b.y));
+		return InRange(p.x, std::min(a.x, b.x), std::max(a.x, b.x)) &&
+			   InRange(p.y, std::min(a.y, b.y), std::max(a.y, b.y));
 	}
 	else
 	{
@@ -498,7 +498,7 @@ Image::Image(string Address, int Height, int Width)
 void Image::SetSize(int Height, int Width)
 {
 	if (address == "")
-		throw "An Image without address can't be resized.";
+		throw "An Image without address can't set size.";
 	else
 	{
 		loadimage(&image, address.c_str(), Height, Width, true);
@@ -630,6 +630,43 @@ int Scene::GetWidth()
 	return width;
 }
 
-void Scene::Draw()
+int Scene::AddEntity(Entity *entity,int priority)
 {
+	pair<Entity*,int> p;
+	p.first = entity;
+	p.second = priority;
+	entities.push_back(p);
+	return entities.size()-1;
+}
+
+void Scene::DelEntity(int index)
+{
+	entities[index] = entities.back();//我的天哪AI大人。
+	entities.pop_back();
+}
+
+void Scene::SetEntity(Entity * entity,int index)
+{
+	entities[index].first = entity;
+}
+
+int Scene::GetIndex(Entity* entity)
+{
+	for(int i=0;i<entities.size();i++)
+	{
+		if(entities[i].first == *entity)
+			return i;
+	}
+	return -1;
+}
+
+void Scene::SetPriority(int p,int index)
+{
+	if(InRange())
+	entities[index].second = p;
+}
+
+void Scene::Draw(Entity entity)
+{
+	
 }
