@@ -1,0 +1,5 @@
+build
+.vscode
+EasyX_Help.chm
+CMakeFiles
+CMakeCache.txt
