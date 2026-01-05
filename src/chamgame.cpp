@@ -2,6 +2,15 @@
 #include "../include/chammath.h"
 using namespace std;
 
+int GRAPH_WIDTH, GRAPH_HEIGHT;
+
+void InitEngine(int width,int height,int flag)
+{
+	GRAPH_WIDTH = width;
+	GRAPH_HEIGHT = height;
+	initgraph(width,height,flag);
+}
+
 AABB::AABB(int MinX, int MaxX, int MinY, int MaxY)
 {
 	minX = MinX;
@@ -15,15 +24,11 @@ AABB AABB::operator+(const AABB &a) const
 	return AABB(std::min(minX, a.minX), std::max(maxX, a.maxX), std::min(minY, a.minY), std::max(maxY, a.maxY));
 } // 包围盒合并运算
 
-AABB AABB::operator+(const Point &p) const
-{
-	return AABB(minX + p.x, maxX + p.x, minY + p.y, maxY + p.y);
-}
 
 void AABB::Draw(Point origin, COLORREF color)
 {
 	setlinecolor(color);
-	rectangle(minX + origin.x, origin.y - minY, maxX + origin.x, origin.y - maxY);
+	rectangle(minX,minY, maxX,maxY);
 }
 
 // 包围盒碰撞检测
@@ -52,11 +57,12 @@ Point::Point(int X, int Y)
 	y = Y;
 }
 
-void Point::Draw(Point origin, COLORREF color) // 相对坐标转绝对坐标绘制
+void Point::Draw(Point origin, COLORREF color) // 相对坐标转EasyX坐标绘制
 {
 	setlinecolor(color);
 	setfillcolor(color);
-	fillcircle(origin.x + x, origin.y - y, 2);
+	Point EasyXP = Point(x,y).AbsToRel(origin).ToEasyX();
+	fillcircle(EasyXP.x,EasyXP.y, 2);
 }
 
 AABB Point::GetAABB()
@@ -100,12 +106,17 @@ void Point::Zoom(Point center, double scale) // 以center为中心缩放scale倍
 
 Point Point::RelToAbs(Point origin)
 {
-	return Point(origin.x + x, origin.y - y);
+	return Point(origin.x + x, origin.y + y);
 }
 
 Point Point::AbsToRel(Point origin)
 {
 	return Point(x - origin.x, y - origin.y);
+}
+
+Point Point::ToEasyX()
+{
+	return Point(x,GRAPH_HEIGHT - y);
 }
 
 double Distance(Point a, Point b)
@@ -154,7 +165,7 @@ void Line::Move(int dx, int dy)
 	Move(delta);
 }
 
-void Line::Rotate(Point centerPoint, double angle) // 以centerPoint为中心逆时针旋转angle弧度
+void Line::Rotate(Point centerPoint, double angle)
 {
 	a.Rotate(centerPoint, angle);
 	b.Rotate(centerPoint, angle);
@@ -162,7 +173,7 @@ void Line::Rotate(Point centerPoint, double angle) // 以centerPoint为中心逆
 		center.Rotate(centerPoint, angle);
 }
 
-void Line::Zoom(Point centerPoint, double scale) // 以centerPoint为中心缩放scale倍
+void Line::Zoom(Point centerPoint, double scale)
 {
 	a.Zoom(centerPoint, scale);
 	b.Zoom(centerPoint, scale);
@@ -175,19 +186,19 @@ void Line::Draw(Point origin, COLORREF color)
 	setlinecolor(color);
 	if (type == 0)
 	{
-		Point realA = a.RelToAbs(origin);
-		Point realB = b.RelToAbs(origin);
+		Point realA = a.RelToAbs(origin).ToEasyX();
+		Point realB = b.RelToAbs(origin).ToEasyX();
 		line(realA.x, realA.y, realB.x, realB.y);
 	}
 	else
 	{
-		double r = sqrt(pow(a.x - center.x, 2) + pow(a.y - center.y, 2));
+		double r = Distance(center,a);
 		double stangle = atan2(a.y - center.y, a.x - center.x);
 		double endangle = atan2(b.y - center.y, b.x - center.x);
 		while (endangle < stangle)
 			endangle += 2 * PI;
-		Point bottom_left = Point(center.x - r, center.y - r).RelToAbs(origin);
-		Point top_right = Point(center.x + r, center.y + r).RelToAbs(origin);
+		Point bottom_left = Point(center.x - r, center.y - r).RelToAbs(origin).ToEasyX();
+		Point top_right = Point(center.x + r, center.y + r).RelToAbs(origin).ToEasyX();
 		arc(bottom_left.x, top_right.y, top_right.x, bottom_left.y, stangle, endangle);
 	}
 }
@@ -363,6 +374,22 @@ double Line::EndAngle()
 	}
 }
 
+Line Line::RelToAbs(Point origin)
+{
+	if(type)
+		return Line(center.RelToAbs(origin),StartAngle(),EndAngle(),Radius());
+	else
+		return Line(a.RelToAbs(origin),b.RelToAbs(origin));
+}
+
+Line Line::AbsToRel(Point origin)
+{
+	if(type)
+		return Line(center.AbsToRel(origin),StartAngle(),EndAngle(),Radius());
+	else
+		return Line(a.AbsToRel(origin),b.AbsToRel(origin));
+}
+
 bool Crash(Line a, Line b)
 {
 	AABB A = a.GetAABB();
@@ -464,6 +491,26 @@ void Shape::Zoom(Point centerPoint, double scale)
 	}
 }
 
+Shape Shape::RelToAbs(Point origin)
+{
+	Shape ret = *this;
+	for(int i = 0;i<lines.size();i++)
+	{
+		ret.lines[i].RelToAbs(origin);
+	}
+	return ret;
+}
+
+Shape Shape::AbsToRel(Point origin)
+{
+	Shape ret = *this;
+	for(int i = 0;i<lines.size();i++)
+	{
+		ret.lines[i].AbsToRel(origin);
+	}
+	return ret;
+}
+
 bool Crash(Shape a, Shape b)
 {
 	AABB A = a.GetAABB();
@@ -503,9 +550,10 @@ void Image::SetSize(int Height, int Width)
 	width = Width;
 }
 
-void Image::Draw(Point pos, DWORD dwrop)
+void Image::Draw(Point origin, DWORD dwrop)
 {
-	putimage(pos.x, pos.y, &image, dwrop);
+	Point pos = origin.ToEasyX();
+	putimage(pos.x - (width/2), pos.y - (height/2), &image, dwrop);
 }
 
 void Image::Rotate(double angle)
@@ -594,7 +642,7 @@ int Entity::AddSkin(string path)
 void Entity::Draw(Point origin)
 {
 	Point realPos = pos.RelToAbs(origin);
-	putimage(realPos.x, realPos.y, &(CurrentSkin()->image));
+	CurrentSkin()->Draw(realPos);
 }
 
 void Entity::Move(int dx, int dy)
@@ -705,7 +753,7 @@ void Scene::SetPriority(int p, int index)
 
 void Scene::Draw()
 {
-	for (int i = maxPriority; i >= 0; i--)
+	for (int i = 0; i <= maxPriority; i++)
 	{
 		for (int j = 0; j < entities.size(); j++)
 		{
