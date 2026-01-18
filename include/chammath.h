@@ -11,10 +11,10 @@ class Matrix
     int hight,width;
     vector<vector<double>> data;
     Matrix(int H,int W);
-    void SetZero();
-    void SetIdentity();
-    bool Set(int x,int y,double val);
-    double Get(int x,int y);
+    void SetZero();//全0矩阵，初始化用
+    void SetIdentity();//变为但未矩阵
+    bool Set(int x,int y,double val);//更改单个元素值 
+    double Get(int x,int y);//获取单个元素值
     Matrix operator+(const Matrix &a) const;
     Matrix operator*(const Matrix &a) const;
     Matrix operator*(const double &a) const;
@@ -27,18 +27,19 @@ class Matrix
     Matrix operator/(const int &a) const;
     Matrix operator/(const long &a) const;
     Matrix operator/(const long long &a) const;
-    Matrix SubMatrix(int x,int y);
-    double Minor(int x,int y);
-    double Cofactor(int x,int y);
-    Matrix Transform();
-    double Det();
-    Matrix Adj();
-    Matrix Inverse();
+
+    Matrix SubMatrix(int x,int y);//余子式矩阵
+    double Minor(int x,int y);//余子式
+    double Cofactor(int x,int y);//代数余子式
+    Matrix Transform();//转置矩阵
+    double Det();//行列式
+    Matrix Adj();//伴随矩阵
+    Matrix Inverse();//逆矩阵
 };
 
 
-bool MatrixAddable(const Matrix &a,const Matrix &b);
-bool MatrixMultipliable(const Matrix &a,const Matrix &b);
+bool MatrixAddable(const Matrix &a,const Matrix &b);//检测两个矩阵是否可相加
+bool MatrixMultipliable(const Matrix &a,const Matrix &b);//检测两个矩阵是否可相乘
 
 int RAND();//生成范围为原版平方的大随机数
 

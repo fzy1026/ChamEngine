@@ -42,6 +42,7 @@ public:
 
 double Distance(Point a, Point b); // 不建议直接使用这个函数，除非你确定两个点在同一坐标系下
 
+Point MousePos(); // 获取鼠标在EasyX坐标系下的绝对坐标
 
 /*
 包围盒类
@@ -159,9 +160,9 @@ public:
 	int AddSkin(Image img);
 	int AddSkin(string path);
 	void Draw(Point origin = Point(0, 0)); // 以origin为pos绝对坐标，转EasyX坐标绘制
-	void Move(int dx, int dy);
-	void MoveTo(Point newPos);
-	void MoveTo(int x, int y);
+	void Move(int dx, int dy);//位移
+	void MoveTo(Point newPos);//移动到新位置(相对坐标)
+	void MoveTo(int x, int y);//移动到新位置(相对坐标)
 	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
 	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
 	Image *CurrentSkin();
@@ -176,6 +177,7 @@ bool Crash(Entity a, Entity b);//不建议直接使用这个函数，除非你�
 class Scene
 {
 public:
+	COLORREF bgColor;  // 场景背景色
 	double scale;						  // 场景放缩比例
 	Point origin;						  // 原点在EasyX的绝对坐标
 	vector<pair<Entity *, int>> entities; // 场景所管理的实体，以及其对应的优先级
@@ -189,6 +191,8 @@ public:
 	int GetIndex(Entity *entity);					 // 查找实体对应索引,-1代表未找到
 	void SetPriority(int p, int index);				 // 设置某实体优先级
 	void SetScale(double Scale);
+	void SetBackgroundColor(COLORREF color);// 设置背景色
+	Point GetMousePos();
 	// TODO:查找部分也许可以加优化....?
 };
 

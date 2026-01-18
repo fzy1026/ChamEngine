@@ -4,6 +4,7 @@ using namespace std;
 
 int GRAPH_WIDTH, GRAPH_HEIGHT;
 
+
 void InitEngine(int width,int height,int flag)
 {
 	GRAPH_WIDTH = width;
@@ -127,6 +128,15 @@ double Distance(Point a, Point b)
 Point MidPoint(Point a, Point b)
 {
 	return Point((a.x + b.x) / 2, (a.y + b.y) / 2);
+}
+
+Point MousePos()
+{
+	Point p;
+	ExMessage m = getmessage(EM_MOUSE);
+	p.x = m.x;
+	p.y = GRAPH_HEIGHT - m.y;
+	return p;
 }
 
 /*
@@ -753,6 +763,9 @@ void Scene::SetPriority(int p, int index)
 
 void Scene::Draw()
 {
+	BeginBatchDraw();
+	setfillcolor(bgColor);
+	fillrectangle(0, 0, GRAPH_WIDTH, GRAPH_HEIGHT);
 	for (int i = 0; i <= maxPriority; i++)
 	{
 		for (int j = 0; j < entities.size(); j++)
@@ -765,9 +778,18 @@ void Scene::Draw()
 			}
 		}
 	}
+	EndBatchDraw();
 }
 
 void Scene::SetScale(double Scale)
 {
 	scale = Scale;
+}
+
+Point Scene::GetMousePos()
+{
+	Point p = MousePos();
+	p = p.AbsToRel(origin);
+	p.Zoom(Point(0, 0), 1.0 / scale);
+	return p;
 }
