@@ -2,14 +2,15 @@
 #include "../include/chammath.h"
 using namespace std;
 
+short KeyState[256],LastKeyState[256];// 键盘状态数组(当下&上一帧)
+const bool KEY_DOWN = 1, KEY_UP = 0; // 按键状态常量
 int GRAPH_WIDTH, GRAPH_HEIGHT;
 
-
-void InitEngine(int width,int height,int flag)
+void InitEngine(int width, int height, int flag)
 {
 	GRAPH_WIDTH = width;
 	GRAPH_HEIGHT = height;
-	initgraph(width,height,flag);
+	initgraph(width, height, flag);
 }
 
 AABB::AABB(int MinX, int MaxX, int MinY, int MaxY)
@@ -25,11 +26,10 @@ AABB AABB::operator+(const AABB &a) const
 	return AABB(std::min(minX, a.minX), std::max(maxX, a.maxX), std::min(minY, a.minY), std::max(maxY, a.maxY));
 } // 包围盒合并运算
 
-
 void AABB::Draw(Point origin, COLORREF color)
 {
 	setlinecolor(color);
-	rectangle(minX,minY, maxX,maxY);
+	rectangle(minX, minY, maxX, maxY);
 }
 
 // 包围盒碰撞检测
@@ -62,8 +62,8 @@ void Point::Draw(Point origin, COLORREF color) // 相对坐标转EasyX坐标绘�
 {
 	setlinecolor(color);
 	setfillcolor(color);
-	Point EasyXP = Point(x,y).AbsToRel(origin).ToEasyX();
-	fillcircle(EasyXP.x,EasyXP.y, 2);
+	Point EasyXP = Point(x, y).AbsToRel(origin).ToEasyX();
+	fillcircle(EasyXP.x, EasyXP.y, 2);
 }
 
 AABB Point::GetAABB()
@@ -117,7 +117,7 @@ Point Point::AbsToRel(Point origin)
 
 Point Point::ToEasyX()
 {
-	return Point(x,GRAPH_HEIGHT - y);
+	return Point(x, GRAPH_HEIGHT - y);
 }
 
 double Distance(Point a, Point b)
@@ -202,7 +202,7 @@ void Line::Draw(Point origin, COLORREF color)
 	}
 	else
 	{
-		double r = Distance(center,a);
+		double r = Distance(center, a);
 		double stangle = atan2(a.y - center.y, a.x - center.x);
 		double endangle = atan2(b.y - center.y, b.x - center.x);
 		while (endangle < stangle)
@@ -386,18 +386,18 @@ double Line::EndAngle()
 
 Line Line::RelToAbs(Point origin)
 {
-	if(type)
-		return Line(center.RelToAbs(origin),StartAngle(),EndAngle(),Radius());
+	if (type)
+		return Line(center.RelToAbs(origin), StartAngle(), EndAngle(), Radius());
 	else
-		return Line(a.RelToAbs(origin),b.RelToAbs(origin));
+		return Line(a.RelToAbs(origin), b.RelToAbs(origin));
 }
 
 Line Line::AbsToRel(Point origin)
 {
-	if(type)
-		return Line(center.AbsToRel(origin),StartAngle(),EndAngle(),Radius());
+	if (type)
+		return Line(center.AbsToRel(origin), StartAngle(), EndAngle(), Radius());
 	else
-		return Line(a.AbsToRel(origin),b.AbsToRel(origin));
+		return Line(a.AbsToRel(origin), b.AbsToRel(origin));
 }
 
 bool Crash(Line a, Line b)
@@ -504,7 +504,7 @@ void Shape::Zoom(Point centerPoint, double scale)
 Shape Shape::RelToAbs(Point origin)
 {
 	Shape ret = *this;
-	for(int i = 0;i<lines.size();i++)
+	for (int i = 0; i < lines.size(); i++)
 	{
 		ret.lines[i].RelToAbs(origin);
 	}
@@ -514,7 +514,7 @@ Shape Shape::RelToAbs(Point origin)
 Shape Shape::AbsToRel(Point origin)
 {
 	Shape ret = *this;
-	for(int i = 0;i<lines.size();i++)
+	for (int i = 0; i < lines.size(); i++)
 	{
 		ret.lines[i].AbsToRel(origin);
 	}
@@ -547,7 +547,7 @@ Image::Image(string Address, int Height, int Width)
 	height = Height;
 	width = Width;
 	loadimage(&image, Address.c_str(), Height, Width, true);
-	if(height * width == 0)
+	if (height * width == 0)
 	{
 		height = image.getheight();
 		width = image.getwidth();
@@ -563,7 +563,7 @@ void Image::SetSize(int Height, int Width)
 void Image::Draw(Point origin, DWORD dwrop)
 {
 	Point pos = origin.ToEasyX();
-	putimage(pos.x - (width/2), pos.y - (height/2), &image, dwrop);
+	putimage(pos.x - (width / 2), pos.y - (height / 2), &image, dwrop);
 }
 
 void Image::Rotate(double angle)
@@ -786,10 +786,56 @@ void Scene::SetScale(double Scale)
 	scale = Scale;
 }
 
+void Scene::SetBackgroundColor(COLORREF color)
+{
+	bgColor = color;
+}
+
 Point Scene::GetMousePos()
 {
 	Point p = MousePos();
 	p = p.AbsToRel(origin);
 	p.Zoom(Point(0, 0), 1.0 / scale);
 	return p;
+}
+
+void RefreshKeyState()
+{
+	for(int i = 0; i < 256; i++)
+	{
+		LastKeyState[i] = KeyState[i];
+	}
+	ExMessage msg;
+	while (peekmessage(&msg, EM_KEY))
+	{
+		if (msg.message == WM_KEYDOWN)
+		{
+			KeyState[msg.vkcode] = KEY_DOWN;
+		}
+		else
+		{
+			KeyState[msg.vkcode] = KEY_UP;
+		}
+	}
+}
+
+bool KeyDown(char key)
+{
+	return KeyState[(unsigned char)key] == KEY_DOWN;
+}
+
+bool KeyUp(char key)
+{
+	return KeyState[(unsigned char)key] == KEY_UP;
+}
+
+bool KeyPress(char key)
+{
+	return KeyState[(unsigned char)key] == KEY_DOWN && LastKeyState[(unsigned char)key] == KEY_UP;
+}
+
+bool KeyRelease(char key)
+
+{
+	return KeyState[(unsigned char)key] == KEY_UP && LastKeyState[(unsigned char)key] == KEY_DOWN;
 }

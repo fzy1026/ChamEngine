@@ -177,7 +177,7 @@ bool Crash(Entity a, Entity b);//不建议直接使用这个函数，除非你�
 class Scene
 {
 public:
-	COLORREF bgColor;  // 场景背景色
+	COLORREF bgColor = BLACK;  // 场景背景色
 	double scale;						  // 场景放缩比例
 	Point origin;						  // 原点在EasyX的绝对坐标
 	vector<pair<Entity *, int>> entities; // 场景所管理的实体，以及其对应的优先级
@@ -195,5 +195,13 @@ public:
 	Point GetMousePos();
 	// TODO:查找部分也许可以加优化....?
 };
+
+
+
+void RefreshKeyState();//刷新键盘状态,必须在每一帧开始时调用一次，以保证KeyPress和KeyRelease的正确性
+bool KeyDown(char key);//检测某键是否按下
+bool KeyUp(char key);//检测某键是否松开
+bool KeyPress(char key);//检测某键是否正被按下,即上一次检测时松开而这次按下
+bool KeyRelease(char key);//检测某键是否正被松开,即上一次检测时按下而这次松开
 
 #endif

@@ -7,6 +7,8 @@
 
 using namespace std;
 
+
+
 int main()
 {
 	InitEngine(640, 480);
@@ -15,11 +17,29 @@ int main()
 	entity.SetSkin(entity.AddSkin("resources\\images\\test.png"));
 
 	Scene main(Point(320, 240));
+	COLORREF bgColor = WHITE;
+	main.SetBackgroundColor(bgColor);
 	main.scale = 0.25;
 	main.AddEntity(&entity);
 	while (1)
 	{
-		entity.MoveTo(main.GetMousePos());
+		RefreshKeyState();
+		if(KeyDown('W'))
+		{
+			entity.Move(0,10);
+		}
+		if(KeyDown('S'))
+		{
+			entity.Move(0,-10);
+		}
+		if(KeyPress('A'))
+		{
+			entity.Move(-10,0);
+		}
+		if(KeyPress('D'))
+		{
+			entity.Move(10,0);
+		}
 		main.Draw();
 	}
 
