@@ -17,7 +17,6 @@ int main()
 	
 	Textbox textbox("Hello, World!", 200, 100);
 	textbox.SetPosition(0, 0);
-	textbox.Draw(Origin);
 	textbox.AddSkin("resources/images/test.png");
 
 	Scene main(Origin);

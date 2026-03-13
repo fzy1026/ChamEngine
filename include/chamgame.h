@@ -55,6 +55,7 @@ public:
 	AABB(int MinX = 0, int MaxX = 0, int MinY = 0, int MaxY = 0);
 	AABB operator+(const AABB &a) const; // 包围盒合并运算
 	void Draw(Point origin = Point(0, 0), COLORREF color = WHITE);
+	void Zoom(Point center,double scale);
 };
 
 // 包围盒碰撞检测
@@ -169,7 +170,7 @@ public:
 	void MoveTo(Point newPos);//移动到新位置(相对坐标)
 	void MoveTo(int x, int y);//移动到新位置(相对坐标)
 	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
-	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
+	virtual void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
 	Image *CurrentSkin();
 	virtual ~Entity() = default;
 };
@@ -184,7 +185,7 @@ class Textbox: public Entity
 {
 public:
 	string text;
-	int fontSize;
+	double fontSize;
 	string fontName;
 	COLORREF color;
 	int width, height;//文本框尺寸
@@ -194,6 +195,7 @@ public:
 	void SetFont(int FontSize, string FontName);
 	void SetColor(COLORREF Color);
 	void Draw(Point origin = Point(0, 0)) override;
+	void Zoom(Point center,double scale);//文本框覆写的Zoom函数
 };
 
 bool Crash(Entity a, Entity b);//不建议直接使用这个函数，除非你确定两个实体处于同一坐标系下！

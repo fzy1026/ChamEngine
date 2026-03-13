@@ -811,9 +811,10 @@ void Scene::Draw()
 		{
 			if (entities[j].second == i)
 			{
-				Entity e = *(entities[j].first);
-				e.Zoom(Point(0, 0), scale);
-				e.Draw(origin);
+				Entity *e = (entities[j].first);
+				e->Zoom(Point(0, 0), scale);
+				e->Draw(origin);
+				e->Zoom(Point(0, 0), 1.0/scale);
 			}
 		}
 	}
@@ -896,11 +897,12 @@ void Textbox::SetColor(COLORREF Color)
 
 void Textbox::Draw(Point origin)
 {
+	Entity::Draw(origin);
 	settextcolor(color);
-	settextstyle(fontSize, 0, fontName.c_str());
-	Point realorigin = origin.ToEasyX();
-	Point realleftup = Point(realorigin.x - width / 2, realorigin.y - height / 2);
-	Point realrightdown = Point(realorigin.x + width / 2, realorigin.y + height / 2);
+	settextstyle(int(fontSize), 0, fontName.c_str());
+	Point realpos = pos.RelToAbs(origin);
+	Point realleftup = Point(pos.x - width / 2, pos.y - height / 2);
+	Point realrightdown = Point(pos.x + width / 2, pos.y + height / 2);
 	RECT rect = {realleftup.x, realleftup.y, realrightdown.x, realrightdown.y};
 	drawtext(text.c_str(), &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 }
@@ -916,7 +918,28 @@ Textbox::Textbox(string Text, int Width, int Height, int FontSize, string FontNa
 	text = Text;
 	width = Width;
 	height = Height;
+	CrashBox = Rectangle(Point(0,0),Width,Height);
 	color = Color;
 	fontSize = FontSize;
 	fontName = FontName;
+}
+
+void AABB::Zoom(Point center,double scale)
+{
+	Point MinP(minX,minY);
+	Point MaxP(maxX,maxY);
+	MinP.Zoom(center,scale);
+	MaxP.Zoom(center,scale);
+	minX = MinP.x;
+	minY = MinP.y;
+	maxX = MaxP.x;
+	maxY = MaxP.y;
+}
+
+void Textbox::Zoom(Point center,double scale)
+{
+	Entity::Zoom(center,scale);
+	fontSize *= scale;
+	width *= scale;
+	height *= scale;
 }
