@@ -38,6 +38,8 @@ class Matrix
 };
 
 
+
+
 bool MatrixAddable(const Matrix &a,const Matrix &b);//检测两个矩阵是否可相加
 bool MatrixMultipliable(const Matrix &a,const Matrix &b);//检测两个矩阵是否可相乘
 

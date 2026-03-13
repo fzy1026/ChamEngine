@@ -541,6 +541,28 @@ bool Crash(Shape a, Shape b)
 	}
 }
 
+Shape Rectangle(Point center, int width, int height)
+{
+	vector<Line> lines;
+	lines.push_back(Line(Point(center.x - width / 2, center.y - height / 2), Point(center.x + width / 2, center.y - height / 2)));
+	lines.push_back(Line(Point(center.x + width / 2, center.y - height / 2), Point(center.x + width / 2, center.y + height / 2)));
+	lines.push_back(Line(Point(center.x + width / 2, center.y + height / 2), Point(center.x - width / 2, center.y + height / 2)));
+	lines.push_back(Line(Point(center.x - width / 2, center.y + height / 2), Point(center.x - width / 2, center.y - height / 2)));
+	return Shape(lines);
+}
+
+Shape Circle(Point center, int r)
+{
+	vector<Line> lines;
+	lines.push_back(Line(center, 0, 2 * PI, r));
+	return Shape(lines);
+}
+
+Shape Squre(Point center, int width)
+{
+	return Rectangle(center, width, width);
+}
+
 Image::Image(string Address, int Height, int Width)
 {
 	address = Address;
@@ -593,6 +615,20 @@ void Image::Zoom(double scale)
 	height *= scale;
 	width *= scale;
 }
+
+Entity::Entity()
+{
+	CrashBox = Shape();
+	skinIndex = 0;
+}
+
+Entity::Entity(Image image)
+{
+	CrashBox = Rectangle(Point(0, 0), image.width, image.height);
+	skins.push_back(image);
+	skinIndex = 0;
+}
+
 void Entity::SetPosition(int x, int y)
 {
 	pos.Set(x, y);
@@ -646,6 +682,9 @@ int Entity::AddSkin(string path)
 {
 	Image img(path);
 	skins.push_back(img);
+	if(skins.size() == 1)
+		skinIndex = 0;
+		//md这块空皮肤没处理我排了整整一天。
 	return skins.size() - 1;
 }
 
@@ -835,7 +874,49 @@ bool KeyPress(char key)
 }
 
 bool KeyRelease(char key)
-
 {
 	return KeyState[(unsigned char)key] == KEY_UP && LastKeyState[(unsigned char)key] == KEY_DOWN;
+}
+
+void Textbox::SetText(string Text)
+{
+	text = Text;
+}
+
+void Textbox::SetFont(int FontSize, string FontName)
+{
+	fontSize = FontSize;
+	fontName = FontName;
+}
+
+void Textbox::SetColor(COLORREF Color)
+{
+	color = Color;
+}
+
+void Textbox::Draw(Point origin)
+{
+	settextcolor(color);
+	settextstyle(fontSize, 0, fontName.c_str());
+	Point realorigin = origin.ToEasyX();
+	Point realleftup = Point(realorigin.x - width / 2, realorigin.y - height / 2);
+	Point realrightdown = Point(realorigin.x + width / 2, realorigin.y + height / 2);
+	RECT rect = {realleftup.x, realleftup.y, realrightdown.x, realrightdown.y};
+	drawtext(text.c_str(), &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+}
+
+void Textbox::SetSize(int Width, int Height)
+{
+	width = Width;
+	height = Height;
+}
+
+Textbox::Textbox(string Text, int Width, int Height, int FontSize, string FontName, COLORREF Color) :Entity()
+{
+	text = Text;
+	width = Width;
+	height = Height;
+	color = Color;
+	fontSize = FontSize;
+	fontName = FontName;
 }

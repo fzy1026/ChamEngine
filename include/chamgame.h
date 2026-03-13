@@ -123,6 +123,9 @@ public:
 };
 
 bool Crash(Shape a, Shape b); // 不建议使用这个函数,除非你确定他们处于同一坐标系下！
+Shape Rectangle(Point center, int width, int height); // 以center为中心，宽width高height的矩形
+Shape Circle(Point center, int r); // 以center为圆心，半径r的圆
+Shape Squre(Point center, int width); // 以center为中心，边长width的正方形
 
 //
 class Image
@@ -136,7 +139,7 @@ public:
 	void SetSize(int Height, int Width);						  // 更改图片尺寸
 	void Load();												  // 按照当前尺寸与角度,从Address处加载图片
 	void SetAddress(string Address);							  // 更改加载地址
-	void Draw(Point origin = Point(0, 0), DWORD dwrop = SRCCOPY); // 以origin(绝对坐标)为图片中心，绘制上一次Load的图片
+	void Draw(Point origin = Point(0, 0),DWORD dwrop = SRCCOPY); // 以origin(绝对坐标)为图片中心，绘制上一次Load的图片
 	void Rotate(double angle);									  // 逆时针旋转angle弧度
 	void SetAng(double angle);									  // 设置图片旋转角度
 	void Zoom(double scale);									  // 缩放scale倍
@@ -145,6 +148,8 @@ public:
 class Entity
 {
 public:
+	Entity();
+	Entity(Image image);
 	Shape CrashBox;
 	vector<Image> skins;
 	int skinIndex;
@@ -159,13 +164,36 @@ public:
 	void DelSkin(int index);
 	int AddSkin(Image img);
 	int AddSkin(string path);
-	void Draw(Point origin = Point(0, 0)); // 以origin为pos绝对坐标，转EasyX坐标绘制
+	virtual void Draw(Point origin = Point(0, 0)); // 以origin为pos绝对坐标，转EasyX坐标绘制
 	void Move(int dx, int dy);//位移
 	void MoveTo(Point newPos);//移动到新位置(相对坐标)
 	void MoveTo(int x, int y);//移动到新位置(相对坐标)
 	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
 	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
 	Image *CurrentSkin();
+	virtual ~Entity() = default;
+};
+
+/*
+文本框类
+用于把文本当作一个实体进行操作
+算是实体类扩展的演示（？）
+*/
+
+class Textbox: public Entity
+{
+public:
+	string text;
+	int fontSize;
+	string fontName;
+	COLORREF color;
+	int width, height;//文本框尺寸
+	Textbox(string Text,int Width, int Height, int FontSize = 20, string FontName = "微软雅黑", COLORREF Color = WHITE);
+	void SetText(string Text);
+	void SetSize(int Width, int Height);
+	void SetFont(int FontSize, string FontName);
+	void SetColor(COLORREF Color);
+	void Draw(Point origin = Point(0, 0)) override;
 };
 
 bool Crash(Entity a, Entity b);//不建议直接使用这个函数，除非你确定两个实体处于同一坐标系下！

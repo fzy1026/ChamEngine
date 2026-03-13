@@ -6,45 +6,51 @@
 #include <unistd.h>
 
 using namespace std;
-
+//TODO:文字展示
+//TODO:基础demo
 
 
 int main()
 {
+	Point Origin(320,240);
 	InitEngine(640, 480);
-	Entity entity;
-	entity.SetPosition(0, 0);
-	entity.SetSkin(entity.AddSkin("resources\\images\\test.png"));
+	
+	Textbox textbox("Hello, World!", 200, 100);
+	textbox.SetPosition(0, 0);
+	textbox.Draw(Origin);
+	textbox.AddSkin("resources/images/test.png");
 
-	Scene main(Point(320, 240));
-	COLORREF bgColor = WHITE;
+	Scene main(Origin);
+	COLORREF bgColor = BLACK;
 	main.SetBackgroundColor(bgColor);
 	main.scale = 0.25;
-	main.AddEntity(&entity);
+	main.AddEntity(&textbox);
+
 	while (1)
 	{
 		RefreshKeyState();
 		if(KeyDown('W'))
 		{
-			entity.Move(0,10);
+			textbox.Move(0,10);
 		}
 		if(KeyDown('S'))
 		{
-			entity.Move(0,-10);
+			textbox.Move(0,-10);
 		}
-		if(KeyPress('A'))
+		if(KeyDown('A'))
 		{
-			entity.Move(-10,0);
+			textbox.Move(-10,0);
 		}
-		if(KeyPress('D'))
+		if(KeyDown('D'))
 		{
-			entity.Move(10,0);
+			textbox.Move(10,0);
+		}
+		if(KeyDown('X'))
+		{
+			break;
 		}
 		main.Draw();
 	}
-
-	// 按任意键退出
-	system("pause");
 	closegraph();
 
 	return 0;
