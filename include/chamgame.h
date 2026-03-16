@@ -16,8 +16,6 @@ extern int GRAPH_WIDTH, GRAPH_HEIGHT; // 窗口长宽，坐标系转换用
 
 void InitEngine(int width, int height, int flag = 0);
 
-
-
 /*
 点类
 用于定义线类,以及传递坐标
@@ -34,13 +32,14 @@ public:
 	void Move(Point delta);
 	void Move(int dx, int dy);
 	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
-	void Zoom(Point center, double scale);	 // 以center为中心缩放scale倍
+	Point Zoom(Point center, double scale);	 // 以center为中心缩放scale倍
 	Point AbsToRel(Point origin);			 // 相对坐标转绝对坐标
 	Point RelToAbs(Point origin);			 // 绝对坐标转相对坐标
 	Point ToEasyX();						 // 转化为EasyX坐标系的实际绘制坐标,很烦人。
+											 // Point ZoomDraw(Point origin = Point(0, 0), COLORREF color = WHITE, double scale); // 以origin为中心，放大scale倍并绘制
 };
 
-double Distance(Point a, Point b); // 不建议直接使用这个函数，除非你确定两个点在同一坐标系下
+double Distance(Point a, Point b); // 求两点间距离
 
 Point MousePos(); // 获取鼠标在EasyX坐标系下的绝对坐标
 
@@ -55,13 +54,11 @@ public:
 	AABB(int MinX = 0, int MaxX = 0, int MinY = 0, int MaxY = 0);
 	AABB operator+(const AABB &a) const; // 包围盒合并运算
 	void Draw(Point origin = Point(0, 0), COLORREF color = WHITE);
-	void Zoom(Point center,double scale);
+	AABB Zoom(Point center, double scale);
 };
 
 // 包围盒碰撞检测
 bool Crash(AABB a, AABB b);
-
-
 
 Point MidPoint(Point a, Point b);
 
@@ -79,6 +76,7 @@ public:
 
 	Line(Point A, Point B);										 // 作为直线构建
 	Line(Point C, double StartAngle, double EndAngle, double r); // 作为圆弧角度构建
+	Line(Point C, Point A, Point B);							 // 作为圆弧(A->B)三点构建，使用前请确保|AC|=|AB|
 	double Radius();
 	double *GetParameters();
 	AABB GetAABB();
@@ -90,7 +88,7 @@ public:
 	void MoveTo(Point newPos);
 	void MoveTo(int x, int y);
 	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
-	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
+	Line Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
 	bool AngleContains(double angle);		 // 某个角度是否被包含在弧线中
 	Point Projection(Point p);				 // p点在直线上的投影
 	double Angle();							 // 线段方位角(与X轴夹角)
@@ -118,15 +116,15 @@ public:
 	void MoveTo(Point newPos);
 	void MoveTo(int x, int y);
 	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
-	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
+	Shape Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
 	Shape AbsToRel(Point origin);			 // 相对坐标转绝对坐标
 	Shape RelToAbs(Point origin);			 // 绝对坐标转相对坐标
 };
 
-bool Crash(Shape a, Shape b); // 不建议使用这个函数,除非你确定他们处于同一坐标系下！
+bool Crash(Shape a, Shape b);						  // 不建议使用这个函数,除非你确定他们处于同一坐标系下！
 Shape Rectangle(Point center, int width, int height); // 以center为中心，宽width高height的矩形
-Shape Circle(Point center, int r); // 以center为圆心，半径r的圆
-Shape Squre(Point center, int width); // 以center为中心，边长width的正方形
+Shape Circle(Point center, int r);					  // 以center为圆心，半径r的圆
+Shape Squre(Point center, int width);				  // 以center为中心，边长width的正方形
 
 //
 class Image
@@ -140,10 +138,10 @@ public:
 	void SetSize(int Height, int Width);						  // 更改图片尺寸
 	void Load();												  // 按照当前尺寸与角度,从Address处加载图片
 	void SetAddress(string Address);							  // 更改加载地址
-	void Draw(Point origin = Point(0, 0),DWORD dwrop = SRCCOPY); // 以origin(绝对坐标)为图片中心，绘制上一次Load的图片
+	void Draw(Point origin = Point(0, 0), DWORD dwrop = SRCCOPY); // 以origin(绝对坐标)为图片中心，绘制上一次Load的图片
 	void Rotate(double angle);									  // 逆时针旋转angle弧度
 	void SetAng(double angle);									  // 设置图片旋转角度
-	void Zoom(double scale);									  // 缩放scale倍
+	Image Zoom(double scale);									  // 缩放scale倍
 };
 
 class Entity
@@ -165,14 +163,17 @@ public:
 	void DelSkin(int index);
 	int AddSkin(Image img);
 	int AddSkin(string path);
-	virtual void Draw(Point origin = Point(0, 0)); // 以origin为pos绝对坐标，转EasyX坐标绘制
-	void Move(int dx, int dy);//位移
-	void MoveTo(Point newPos);//移动到新位置(相对坐标)
-	void MoveTo(int x, int y);//移动到新位置(相对坐标)
-	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
-	virtual void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
+	virtual void Draw(Point origin = Point(0, 0));	  // 以origin为pos绝对坐标，转EasyX坐标绘制
+	void Move(int dx, int dy);						  // 位移
+	void MoveTo(Point newPos);						  // 移动到新位置(相对坐标)
+	void MoveTo(int x, int y);						  // 移动到新位置(相对坐标)
+	void Rotate(Point center, double angle);		  // 以center(相对坐标)为中心逆时针旋转angle弧度
+	virtual Entity *Zoom(Point center, double scale); // 以center(相对坐标)为中心缩放scale倍
 	Image *CurrentSkin();
 	virtual ~Entity() = default;
+	// TODO:ZoomDraw()
+
+	void Debug();
 };
 
 /*
@@ -181,24 +182,25 @@ public:
 算是实体类扩展的演示（？）
 */
 
-class Textbox: public Entity
+class Textbox : public Entity
 {
 public:
 	string text;
 	double fontSize;
 	string fontName;
 	COLORREF color;
-	int width, height;//文本框尺寸
-	Textbox(string Text,int Width, int Height, int FontSize = 20, string FontName = "微软雅黑", COLORREF Color = WHITE);
+	int width, height; // 文本框尺寸
+	Textbox();
+	Textbox(string Text, int Width, int Height, int FontSize = 20, string FontName = "微软雅黑", COLORREF Color = WHITE);
 	void SetText(string Text);
-	void SetSize(int Width, int Height);
-	void SetFont(int FontSize, string FontName);
+	void SetSize(int Width, int Height);		 // 设置文本框
+	void SetFont(int FontSize, string FontName); // 设置字体
 	void SetColor(COLORREF Color);
 	void Draw(Point origin = Point(0, 0)) override;
-	void Zoom(Point center,double scale);//文本框覆写的Zoom函数
+	Textbox *Zoom(Point center, double scale) override; // 文本框覆写的Zoom函数
 };
 
-bool Crash(Entity a, Entity b);//不建议直接使用这个函数，除非你确定两个实体处于同一坐标系下！
+bool Crash(Entity a, Entity b); // 不建议直接使用这个函数，除非你确定两个实体处于同一坐标系下！
 
 /*场景类
 场景是所有实体的最直接的容器，负责管理和渲染这些实体。
@@ -207,7 +209,7 @@ bool Crash(Entity a, Entity b);//不建议直接使用这个函数，除非你�
 class Scene
 {
 public:
-	COLORREF bgColor = BLACK;  // 场景背景色
+	COLORREF bgColor = BLACK;			  // 场景背景色
 	double scale;						  // 场景放缩比例
 	Point origin;						  // 原点在EasyX的绝对坐标
 	vector<pair<Entity *, int>> entities; // 场景所管理的实体，以及其对应的优先级
@@ -221,17 +223,15 @@ public:
 	int GetIndex(Entity *entity);					 // 查找实体对应索引,-1代表未找到
 	void SetPriority(int p, int index);				 // 设置某实体优先级
 	void SetScale(double Scale);
-	void SetBackgroundColor(COLORREF color);// 设置背景色
+	void SetBackgroundColor(COLORREF color); // 设置背景色
 	Point GetMousePos();
 	// TODO:查找部分也许可以加优化....?
 };
 
-
-
-void RefreshKeyState();//刷新键盘状态,必须在每一帧开始时调用一次，以保证KeyPress和KeyRelease的正确性
-bool KeyDown(char key);//检测某键是否按下
-bool KeyUp(char key);//检测某键是否松开
-bool KeyPress(char key);//检测某键是否正被按下,即上一次检测时松开而这次按下
-bool KeyRelease(char key);//检测某键是否正被松开,即上一次检测时按下而这次松开
+void RefreshKeyState();	   // 刷新键盘状态,必须在每一帧开始时调用一次，以保证KeyPress和KeyRelease的正确性
+bool KeyDown(char key);	   // 检测某键是否按下
+bool KeyUp(char key);	   // 检测某键是否松开
+bool KeyPress(char key);   // 检测某键是否正被按下,即上一次检测时松开而这次按下
+bool KeyRelease(char key); // 检测某键是否正被松开,即上一次检测时按下而这次松开
 
 #endif

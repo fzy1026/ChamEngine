@@ -97,12 +97,12 @@ void Point::Rotate(Point center, double angle) // 以center为中心逆时针旋
 	Set(center.x + r * cos(a), center.y + r * sin(a));
 }
 
-void Point::Zoom(Point center, double scale) // 以center为中心缩放scale倍
+Point Point::Zoom(Point center, double scale) // 以center为中心缩放scale倍
 {
 	double a = atan2(y - center.y, x - center.x);
 	double r = Distance(*this, center);
 	r *= scale;
-	Set(center.x + r * cos(a), center.y + r * sin(a));
+	return Point(center.x + r * cos(a), center.y + r * sin(a));
 }
 
 Point Point::RelToAbs(Point origin)
@@ -151,6 +151,17 @@ Line::Line(Point A, Point B) // 作为直线构建
 	type = 0;
 }
 
+Line::Line(Point C,Point A,Point B)
+{
+	if(Distance(C,A)!= Distance(C,B))
+		throw "|CA| != |CB| when building a arc.";
+	center = C;
+	a = A;
+	b = B;
+	type = 1;
+
+}
+
 Line::Line(Point C, double StartAngle, double EndAngle, double r) // 作为圆弧角度构建
 {
 	if (EndAngle < StartAngle)
@@ -183,12 +194,19 @@ void Line::Rotate(Point centerPoint, double angle)
 		center.Rotate(centerPoint, angle);
 }
 
-void Line::Zoom(Point centerPoint, double scale)
+Line Line::Zoom(Point centerPoint, double scale)
 {
-	a.Zoom(centerPoint, scale);
-	b.Zoom(centerPoint, scale);
+	Point Zooma = a.Zoom(centerPoint, scale);
+	Point Zoomb = b.Zoom(centerPoint, scale);
 	if (type == 1)
-		center.Zoom(centerPoint, scale);
+	{
+		Point Zoomcenter = center.Zoom(centerPoint, scale);
+		return Line(Zoomcenter,Zooma,Zoomb);
+	}
+	else
+	{
+		return Line(Zooma,Zoomb);
+	}
 }
 
 void Line::Draw(Point origin, COLORREF color)
@@ -493,12 +511,14 @@ void Shape::Rotate(Point centerPoint, double angle)
 	}
 }
 
-void Shape::Zoom(Point centerPoint, double scale)
+Shape Shape::Zoom(Point centerPoint, double scale)
 {
+	Shape ret;
 	for (size_t i = 0; i < lines.size(); i++)
 	{
-		lines[i].Zoom(centerPoint, scale);
+		ret.lines.push_back(lines[i].Zoom(centerPoint, scale));
 	}
+	return ret;
 }
 
 Shape Shape::RelToAbs(Point origin)
@@ -610,10 +630,9 @@ void Image::SetAddress(string Address)
 	address = Address;
 }
 
-void Image::Zoom(double scale)
+Image Image::Zoom(double scale)
 {
-	height *= scale;
-	width *= scale;
+	return Image(address,height*scale,width*scale);
 }
 
 Entity::Entity()
@@ -709,15 +728,17 @@ void Entity::MoveTo(int x, int y)
 	pos.Set(x, y);
 }
 
-void Entity::Zoom(Point origin, double scale)
+Entity* Entity::Zoom(Point center, double scale)
 {
-	CrashBox.Zoom(Point(0, 0), scale);
-	pos.Zoom(origin, scale);
+	Entity *ret = new Entity();
+	ret->CrashBox = this->CrashBox.Zoom(Point(0, 0), scale);
+	ret->pos = this->pos.Zoom(center, scale);
 	for (int i = 0; i < skins.size(); i++)
 	{
-		skins[i].Zoom(scale);
-		skins[i].Load();
+		ret->AddSkin(this->skins[i].Zoom(scale));
+		ret->skins[i].Load();
 	}
+	return ret;
 }
 
 void Entity::Rotate(Point origin, double arg)
@@ -811,10 +832,13 @@ void Scene::Draw()
 		{
 			if (entities[j].second == i)
 			{
+				/*
 				Entity *e = (entities[j].first);
 				e->Zoom(Point(0, 0), scale);
 				e->Draw(origin);
 				e->Zoom(Point(0, 0), 1.0/scale);
+				*/
+				entities[j].first->Zoom(Point(0,0),scale)->Draw(origin);
 			}
 		}
 	}
@@ -835,7 +859,7 @@ Point Scene::GetMousePos()
 {
 	Point p = MousePos();
 	p = p.AbsToRel(origin);
-	p.Zoom(Point(0, 0), 1.0 / scale);
+	p = p.Zoom(Point(0, 0), 1.0 / scale);
 	return p;
 }
 
@@ -897,10 +921,10 @@ void Textbox::SetColor(COLORREF Color)
 
 void Textbox::Draw(Point origin)
 {
-	Entity::Draw(origin);
+	//Entity::Draw(origin);
 	settextcolor(color);
 	settextstyle(int(fontSize), 0, fontName.c_str());
-	Point realpos = pos.RelToAbs(origin);
+	Point realpos = pos.AbsToRel(origin);
 	Point realleftup = Point(pos.x - width / 2, pos.y - height / 2);
 	Point realrightdown = Point(pos.x + width / 2, pos.y + height / 2);
 	RECT rect = {realleftup.x, realleftup.y, realrightdown.x, realrightdown.y};
@@ -911,6 +935,16 @@ void Textbox::SetSize(int Width, int Height)
 {
 	width = Width;
 	height = Height;
+}
+
+Textbox::Textbox():Entity()
+{
+	text = "";
+	fontSize = 0;
+	fontName = "";
+	color = WHITE;
+	width = 0;
+	height = 0;
 }
 
 Textbox::Textbox(string Text, int Width, int Height, int FontSize, string FontName, COLORREF Color) :Entity()
@@ -924,22 +958,32 @@ Textbox::Textbox(string Text, int Width, int Height, int FontSize, string FontNa
 	fontName = FontName;
 }
 
-void AABB::Zoom(Point center,double scale)
+AABB AABB::Zoom(Point center,double scale)
 {
 	Point MinP(minX,minY);
 	Point MaxP(maxX,maxY);
-	MinP.Zoom(center,scale);
-	MaxP.Zoom(center,scale);
-	minX = MinP.x;
-	minY = MinP.y;
-	maxX = MaxP.x;
-	maxY = MaxP.y;
+	MinP = MinP.Zoom(center,scale);
+	MaxP = MaxP.Zoom(center,scale);
+	return AABB(MinP.x,MaxP.x,MinP.y,MaxP.y);
 }
 
-void Textbox::Zoom(Point center,double scale)
+Textbox* Textbox::Zoom(Point center,double scale)
 {
-	Entity::Zoom(center,scale);
-	fontSize *= scale;
-	width *= scale;
-	height *= scale;
+	Textbox* ret = new Textbox();
+	ret->CrashBox = this->CrashBox.Zoom(Point(0, 0), scale);
+	ret->pos = this->pos.Zoom(center, scale);
+	for (int i = 0; i < skins.size(); i++)
+	{
+		ret->AddSkin(this->skins[i].Zoom(scale));
+		ret->skins[i].Load();
+	}
+	ret->fontSize *= scale;
+	ret->width *= scale;
+	ret->height *= scale;
+	return ret;
+}
+
+void Entity::Debug()
+{
+	cout<<"Pos:("<<pos.x<<","<<pos.y<<")\n";
 }
