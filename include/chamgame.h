@@ -171,7 +171,6 @@ public:
 	virtual Entity *Zoom(Point center, double scale); // 以center(相对坐标)为中心缩放scale倍
 	Image *CurrentSkin();
 	virtual ~Entity() = default;
-	// TODO:ZoomDraw()
 
 	void Debug();
 };
@@ -193,7 +192,7 @@ public:
 	Textbox();
 	Textbox(string Text, int Width, int Height, int FontSize = 20, string FontName = "微软雅黑", COLORREF Color = WHITE);
 	void SetText(string Text);
-	void SetSize(int Width, int Height);		 // 设置文本框
+	void SetSize(int Width, int Height);		 // 设置文本框宽高
 	void SetFont(int FontSize, string FontName); // 设置字体
 	void SetColor(COLORREF Color);
 	void Draw(Point origin = Point(0, 0)) override;

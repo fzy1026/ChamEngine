@@ -2,8 +2,8 @@
 #include "../include/chammath.h"
 using namespace std;
 
-short KeyState[256],LastKeyState[256];// 键盘状态数组(当下&上一帧)
-const bool KEY_DOWN = 1, KEY_UP = 0; // 按键状态常量
+short KeyState[256], LastKeyState[256]; // 键盘状态数组(当下&上一帧)
+const bool KEY_DOWN = 1, KEY_UP = 0;	// 按键状态常量
 int GRAPH_WIDTH, GRAPH_HEIGHT;
 
 void InitEngine(int width, int height, int flag)
@@ -107,12 +107,12 @@ Point Point::Zoom(Point center, double scale) // 以center为中心缩放scale�
 
 Point Point::RelToAbs(Point origin)
 {
-	return Point(origin.x + x, origin.y + y);
+	return Point(origin.x - x, origin.y - y);
 }
 
 Point Point::AbsToRel(Point origin)
 {
-	return Point(x - origin.x, y - origin.y);
+	return Point(x + origin.x, y + origin.y);
 }
 
 Point Point::ToEasyX()
@@ -151,15 +151,14 @@ Line::Line(Point A, Point B) // 作为直线构建
 	type = 0;
 }
 
-Line::Line(Point C,Point A,Point B)
+Line::Line(Point C, Point A, Point B)
 {
-	if(Distance(C,A)!= Distance(C,B))
+	if (Distance(C, A) != Distance(C, B))
 		throw "|CA| != |CB| when building a arc.";
 	center = C;
 	a = A;
 	b = B;
 	type = 1;
-
 }
 
 Line::Line(Point C, double StartAngle, double EndAngle, double r) // 作为圆弧角度构建
@@ -201,11 +200,11 @@ Line Line::Zoom(Point centerPoint, double scale)
 	if (type == 1)
 	{
 		Point Zoomcenter = center.Zoom(centerPoint, scale);
-		return Line(Zoomcenter,Zooma,Zoomb);
+		return Line(Zoomcenter, Zooma, Zoomb);
 	}
 	else
 	{
-		return Line(Zooma,Zoomb);
+		return Line(Zooma, Zoomb);
 	}
 }
 
@@ -632,7 +631,7 @@ void Image::SetAddress(string Address)
 
 Image Image::Zoom(double scale)
 {
-	return Image(address,height*scale,width*scale);
+	return Image(address, height * scale, width * scale);
 }
 
 Entity::Entity()
@@ -701,9 +700,9 @@ int Entity::AddSkin(string path)
 {
 	Image img(path);
 	skins.push_back(img);
-	if(skins.size() == 1)
+	if (skins.size() == 1)
 		skinIndex = 0;
-		//md这块空皮肤没处理我排了整整一天。
+	// md这块空皮肤没处理我排了整整一天。
 	return skins.size() - 1;
 }
 
@@ -728,7 +727,7 @@ void Entity::MoveTo(int x, int y)
 	pos.Set(x, y);
 }
 
-Entity* Entity::Zoom(Point center, double scale)
+Entity *Entity::Zoom(Point center, double scale)
 {
 	Entity *ret = new Entity();
 	ret->CrashBox = this->CrashBox.Zoom(Point(0, 0), scale);
@@ -775,6 +774,7 @@ void Scene::SetOrigin(Point p)
 int Scene::AddEntity(Entity *entity, int priority)
 {
 	pair<Entity *, int> p;
+
 	p.first = entity;
 	p.second = priority;
 	entities.push_back(p);
@@ -832,13 +832,9 @@ void Scene::Draw()
 		{
 			if (entities[j].second == i)
 			{
-				/*
-				Entity *e = (entities[j].first);
-				e->Zoom(Point(0, 0), scale);
+				Entity *e = entities[j].first->Zoom(Point(0, 0), scale);
 				e->Draw(origin);
-				e->Zoom(Point(0, 0), 1.0/scale);
-				*/
-				entities[j].first->Zoom(Point(0,0),scale)->Draw(origin);
+				free(e);
 			}
 		}
 	}
@@ -865,7 +861,7 @@ Point Scene::GetMousePos()
 
 void RefreshKeyState()
 {
-	for(int i = 0; i < 256; i++)
+	for (int i = 0; i < 256; i++)
 	{
 		LastKeyState[i] = KeyState[i];
 	}
@@ -921,13 +917,16 @@ void Textbox::SetColor(COLORREF Color)
 
 void Textbox::Draw(Point origin)
 {
-	//Entity::Draw(origin);
+	// Entity::Draw(origin);
 	settextcolor(color);
 	settextstyle(int(fontSize), 0, fontName.c_str());
-	Point realpos = pos.AbsToRel(origin);
-	Point realleftup = Point(pos.x - width / 2, pos.y - height / 2);
-	Point realrightdown = Point(pos.x + width / 2, pos.y + height / 2);
+	Point realpos = pos.AbsToRel(origin).ToEasyX();
+	Point realleftup = Point(realpos.x - width / 2, realpos.y - height / 2);
+	Point realrightdown = Point(realpos.x + width / 2, realpos.y + height / 2);
 	RECT rect = {realleftup.x, realleftup.y, realrightdown.x, realrightdown.y};
+	// TODO:Debug
+	//cout << "Debug size" << width << " " << height << endl;
+	//cout << "Debug rect" << realleftup.x << " " << realleftup.y << " " << realrightdown.x << " " << realrightdown.y << endl;
 	drawtext(text.c_str(), &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 }
 
@@ -937,7 +936,7 @@ void Textbox::SetSize(int Width, int Height)
 	height = Height;
 }
 
-Textbox::Textbox():Entity()
+Textbox::Textbox() : Entity()
 {
 	text = "";
 	fontSize = 0;
@@ -947,34 +946,35 @@ Textbox::Textbox():Entity()
 	height = 0;
 }
 
-Textbox::Textbox(string Text, int Width, int Height, int FontSize, string FontName, COLORREF Color) :Entity()
+Textbox::Textbox(string Text, int Width, int Height, int FontSize, string FontName, COLORREF Color) : Entity()
 {
 	text = Text;
 	width = Width;
 	height = Height;
-	CrashBox = Rectangle(Point(0,0),Width,Height);
+	CrashBox = Rectangle(Point(0, 0), Width, Height);
 	color = Color;
 	fontSize = FontSize;
 	fontName = FontName;
 }
 
-AABB AABB::Zoom(Point center,double scale)
+AABB AABB::Zoom(Point center, double scale)
 {
-	Point MinP(minX,minY);
-	Point MaxP(maxX,maxY);
-	MinP = MinP.Zoom(center,scale);
-	MaxP = MaxP.Zoom(center,scale);
-	return AABB(MinP.x,MaxP.x,MinP.y,MaxP.y);
+	Point MinP(minX, minY);
+	Point MaxP(maxX, maxY);
+	MinP = MinP.Zoom(center, scale);
+	MaxP = MaxP.Zoom(center, scale);
+	return AABB(MinP.x, MaxP.x, MinP.y, MaxP.y);
 }
 
-Textbox* Textbox::Zoom(Point center,double scale)
+Textbox *Textbox::Zoom(Point center, double scale)
 {
-	Textbox* ret = new Textbox();
-	ret->CrashBox = this->CrashBox.Zoom(Point(0, 0), scale);
-	ret->pos = this->pos.Zoom(center, scale);
+	Textbox *ret = new Textbox();
+	*ret = *this;
+	ret->CrashBox = ret->CrashBox.Zoom(Point(0, 0), scale);
+	ret->pos = ret->pos.Zoom(center, scale);
 	for (int i = 0; i < skins.size(); i++)
 	{
-		ret->AddSkin(this->skins[i].Zoom(scale));
+		ret->skins[i] = skins[i].Zoom(scale);
 		ret->skins[i].Load();
 	}
 	ret->fontSize *= scale;
@@ -985,5 +985,5 @@ Textbox* Textbox::Zoom(Point center,double scale)
 
 void Entity::Debug()
 {
-	cout<<"Pos:("<<pos.x<<","<<pos.y<<")\n";
+	cout << "Pos:(" << pos.x << "," << pos.y << ")\n";
 }

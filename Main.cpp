@@ -8,23 +8,25 @@
 using namespace std;
 //TODO:文字展示
 //TODO:基础demo
+const int WinWidth = 640,WinHeight = 480;
 
 
 int main()
 {
-	Point Origin(640,480);
-	InitEngine(1280, 960);
+	Point Origin(WinWidth/2,WinHeight/2);
+	InitEngine(WinWidth, WinHeight);
 	
-	Textbox textbox("Hello, World!", 200, 100);
+	Textbox textbox("Hello, World!", 600, 100);
 	textbox.SetPosition(0, 0);
 	textbox.AddSkin("resources/images/test.png");
-	textbox.SetSize(100,100);
-	textbox.SetFont(40,"微软雅黑");
+	//textbox.SetSize(200,200);
+	textbox.SetFont(50,"微软雅黑");
 
 	Scene main(Origin);
 	COLORREF bgColor = BLACK;
 	main.SetBackgroundColor(bgColor);
-	main.scale = 0.25;
+	main.scale = 0.5;
+
 	main.AddEntity(&textbox);
 
 	int TestX = 10;
