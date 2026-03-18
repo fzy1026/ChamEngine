@@ -32,7 +32,7 @@ public:
 	void Move(Point delta);
 	void Move(int dx, int dy);
 	void Rotate(Point center, double angle); // 以center为中心逆时针旋转angle弧度
-	Point Zoom(Point center, double scale);	 // 以center为中心缩放scale倍
+	void Zoom(Point center, double scale);	 // 以center为中心缩放scale倍
 	Point AbsToRel(Point origin);			 // 相对坐标转绝对坐标
 	Point RelToAbs(Point origin);			 // 绝对坐标转相对坐标
 	Point ToEasyX();						 // 转化为EasyX坐标系的实际绘制坐标,很烦人。
@@ -54,7 +54,7 @@ public:
 	AABB(int MinX = 0, int MaxX = 0, int MinY = 0, int MaxY = 0);
 	AABB operator+(const AABB &a) const; // 包围盒合并运算
 	void Draw(Point origin = Point(0, 0), COLORREF color = WHITE);
-	AABB Zoom(Point center, double scale);
+	void Zoom(Point center, double scale);
 };
 
 // 包围盒碰撞检测
@@ -88,7 +88,7 @@ public:
 	void MoveTo(Point newPos);
 	void MoveTo(int x, int y);
 	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
-	Line Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
+	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
 	bool AngleContains(double angle);		 // 某个角度是否被包含在弧线中
 	Point Projection(Point p);				 // p点在直线上的投影
 	double Angle();							 // 线段方位角(与X轴夹角)
@@ -116,7 +116,7 @@ public:
 	void MoveTo(Point newPos);
 	void MoveTo(int x, int y);
 	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
-	Shape Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
+	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
 	Shape AbsToRel(Point origin);			 // 相对坐标转绝对坐标
 	Shape RelToAbs(Point origin);			 // 绝对坐标转相对坐标
 };
@@ -141,7 +141,7 @@ public:
 	void Draw(Point origin = Point(0, 0), DWORD dwrop = SRCCOPY); // 以origin(绝对坐标)为图片中心，绘制上一次Load的图片
 	void Rotate(double angle);									  // 逆时针旋转angle弧度
 	void SetAng(double angle);									  // 设置图片旋转角度
-	Image Zoom(double scale);									  // 缩放scale倍
+	void Zoom(double scale);									  // 缩放scale倍
 };
 
 class Entity
@@ -168,7 +168,8 @@ public:
 	void MoveTo(Point newPos);						  // 移动到新位置(相对坐标)
 	void MoveTo(int x, int y);						  // 移动到新位置(相对坐标)
 	void Rotate(Point center, double angle);		  // 以center(相对坐标)为中心逆时针旋转angle弧度
-	virtual Entity *Zoom(Point center, double scale); // 以center(相对坐标)为中心缩放scale倍
+	virtual void Zoom(Point center, double scale); // 以center(相对坐标)为中心缩放scale倍
+	virtual void ZoomDraw(Point origin = Point(0, 0),double scale = 1); // 以origin为中心，放大scale倍并绘制
 	Image *CurrentSkin();
 	virtual ~Entity() = default;
 
@@ -196,7 +197,8 @@ public:
 	void SetFont(int FontSize, string FontName); // 设置字体
 	void SetColor(COLORREF Color);
 	void Draw(Point origin = Point(0, 0)) override;
-	Textbox *Zoom(Point center, double scale) override; // 文本框覆写的Zoom函数
+	void ZoomDraw(Point origin = Point(0, 0), double scale = 1) override; // 以origin为中心，放大scale倍并绘制
+	void Zoom(Point center, double scale) override; // 文本框覆写的Zoom函数
 };
 
 bool Crash(Entity a, Entity b); // 不建议直接使用这个函数，除非你确定两个实体处于同一坐标系下！

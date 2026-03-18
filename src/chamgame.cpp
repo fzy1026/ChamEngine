@@ -97,12 +97,12 @@ void Point::Rotate(Point center, double angle) // 以center为中心逆时针旋
 	Set(center.x + r * cos(a), center.y + r * sin(a));
 }
 
-Point Point::Zoom(Point center, double scale) // 以center为中心缩放scale倍
+void Point::Zoom(Point center, double scale) // 以center为中心缩放scale倍
 {
 	double a = atan2(y - center.y, x - center.x);
 	double r = Distance(*this, center);
 	r *= scale;
-	return Point(center.x + r * cos(a), center.y + r * sin(a));
+	Set(center.x + r * cos(a), center.y + r * sin(a));
 }
 
 Point Point::RelToAbs(Point origin)
@@ -193,19 +193,12 @@ void Line::Rotate(Point centerPoint, double angle)
 		center.Rotate(centerPoint, angle);
 }
 
-Line Line::Zoom(Point centerPoint, double scale)
+void Line::Zoom(Point centerPoint, double scale)
 {
-	Point Zooma = a.Zoom(centerPoint, scale);
-	Point Zoomb = b.Zoom(centerPoint, scale);
+	a.Zoom(centerPoint, scale);
+	b.Zoom(centerPoint, scale);
 	if (type == 1)
-	{
-		Point Zoomcenter = center.Zoom(centerPoint, scale);
-		return Line(Zoomcenter, Zooma, Zoomb);
-	}
-	else
-	{
-		return Line(Zooma, Zoomb);
-	}
+		center.Zoom(centerPoint, scale);
 }
 
 void Line::Draw(Point origin, COLORREF color)
@@ -510,14 +503,12 @@ void Shape::Rotate(Point centerPoint, double angle)
 	}
 }
 
-Shape Shape::Zoom(Point centerPoint, double scale)
+void Shape::Zoom(Point centerPoint, double scale)
 {
-	Shape ret;
 	for (size_t i = 0; i < lines.size(); i++)
 	{
-		ret.lines.push_back(lines[i].Zoom(centerPoint, scale));
+		lines[i].Zoom(centerPoint, scale);
 	}
-	return ret;
 }
 
 Shape Shape::RelToAbs(Point origin)
@@ -629,9 +620,10 @@ void Image::SetAddress(string Address)
 	address = Address;
 }
 
-Image Image::Zoom(double scale)
+void Image::Zoom(double scale)
 {
-	return Image(address, height * scale, width * scale);
+	height *= scale;
+	width *= scale;
 }
 
 Entity::Entity()
@@ -727,17 +719,16 @@ void Entity::MoveTo(int x, int y)
 	pos.Set(x, y);
 }
 
-Entity *Entity::Zoom(Point center, double scale)
+void Entity::Zoom(Point center, double scale)
 {
-	Entity *ret = new Entity();
-	ret->CrashBox = this->CrashBox.Zoom(Point(0, 0), scale);
-	ret->pos = this->pos.Zoom(center, scale);
+	CrashBox.Zoom(Point(0, 0), scale);
+	pos.Zoom(center, scale);
 	for (int i = 0; i < skins.size(); i++)
 	{
-		ret->AddSkin(this->skins[i].Zoom(scale));
-		ret->skins[i].Load();
+		skins[i].Zoom(scale);
+		skins[i].Load();
 	}
-	return ret;
+
 }
 
 void Entity::Rotate(Point origin, double arg)
@@ -832,9 +823,7 @@ void Scene::Draw()
 		{
 			if (entities[j].second == i)
 			{
-				Entity *e = entities[j].first->Zoom(Point(0, 0), scale);
-				e->Draw(origin);
-				free(e);
+				entities[j].first->ZoomDraw(origin, scale);
 			}
 		}
 	}
@@ -855,7 +844,7 @@ Point Scene::GetMousePos()
 {
 	Point p = MousePos();
 	p = p.AbsToRel(origin);
-	p = p.Zoom(Point(0, 0), 1.0 / scale);
+	p.Zoom(Point(0, 0), 1.0 / scale);
 	return p;
 }
 
@@ -957,33 +946,47 @@ Textbox::Textbox(string Text, int Width, int Height, int FontSize, string FontNa
 	fontName = FontName;
 }
 
-AABB AABB::Zoom(Point center, double scale)
+void AABB::Zoom(Point center, double scale)
 {
 	Point MinP(minX, minY);
 	Point MaxP(maxX, maxY);
-	MinP = MinP.Zoom(center, scale);
-	MaxP = MaxP.Zoom(center, scale);
-	return AABB(MinP.x, MaxP.x, MinP.y, MaxP.y);
+	MinP.Zoom(center, scale);
+	MaxP.Zoom(center, scale);
+	minX = MinP.x;
+	maxX = MaxP.x;
+	minY = MinP.y;
+	maxY = MaxP.y;
 }
 
-Textbox *Textbox::Zoom(Point center, double scale)
+void Textbox::Zoom(Point center, double scale)
 {
-	Textbox *ret = new Textbox();
-	*ret = *this;
-	ret->CrashBox = ret->CrashBox.Zoom(Point(0, 0), scale);
-	ret->pos = ret->pos.Zoom(center, scale);
+	CrashBox.Zoom(Point(0, 0), scale);
+	pos.Zoom(center, scale);
 	for (int i = 0; i < skins.size(); i++)
 	{
-		ret->skins[i] = skins[i].Zoom(scale);
-		ret->skins[i].Load();
+		skins[i].Zoom(scale);
+		skins[i].Load();
 	}
-	ret->fontSize *= scale;
-	ret->width *= scale;
-	ret->height *= scale;
-	return ret;
+	fontSize *= scale;
+	width *= scale;
+	height *= scale;
 }
 
 void Entity::Debug()
 {
 	cout << "Pos:(" << pos.x << "," << pos.y << ")\n";
+}
+
+void Entity::ZoomDraw(Point origin, double scale)
+{
+	Entity e = *this;
+	e.Zoom(origin, scale);
+	e.Draw(origin);
+}
+
+void Textbox::ZoomDraw(Point origin, double scale)
+{
+	Textbox t = *this;
+	t.Zoom(origin, scale);
+	t.Draw(origin);
 }
