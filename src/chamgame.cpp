@@ -578,7 +578,7 @@ Image::Image(string Address, int Height, int Width)
 	address = Address;
 	height = Height;
 	width = Width;
-	loadimage(&image, Address.c_str(), Height, Width, true);
+	loadimage(&image, Address.c_str(),Width,Height, true);
 	if (height * width == 0)
 	{
 		height = image.getheight();
@@ -610,7 +610,7 @@ void Image::SetAng(double angle)
 
 void Image::Load()
 {
-	loadimage(&image, address.c_str(), height, width, true);
+	loadimage(&image, address.c_str(),width, height, true);
 	rotateimage(&image, &image, ang, BLACK, true, true);
 	// TODO:图片旋转后空白部分填充问题
 }
@@ -730,7 +730,6 @@ void Entity::Zoom(Point center, double scale)
 		skins[i].Zoom(scale);
 		skins[i].Load();
 	}
-
 }
 
 void Entity::Rotate(Point origin, double arg)
@@ -908,9 +907,13 @@ void Textbox::SetColor(COLORREF Color)
 
 void Textbox::Draw(Point origin)
 {
+	skins[skinIndex].width = width;
+	skins[skinIndex].height = height;
+	skins[skinIndex].Load();
 	Entity::Draw(origin);
 	settextcolor(color);
 	settextstyle(int(fontSize), 0, fontName.c_str());
+	setbkmode(TRANSPARENT); // 文字背景透明
 	Point realpos = pos.AbsToRel(origin).ToEasyX();
 	Point realleftup = Point(realpos.x - width / 2, realpos.y - height / 2);
 	Point realrightdown = Point(realpos.x + width / 2, realpos.y + height / 2);
@@ -979,14 +982,14 @@ void Entity::Debug()
 void Entity::ZoomDraw(Point origin, double scale)
 {
 	Entity e = *this;
-	e.Zoom(Point(0,0), scale);
+	e.Zoom(Point(0, 0), scale);
 	e.Draw(origin);
 }
 
 void Textbox::ZoomDraw(Point origin, double scale)
 {
 	Textbox t = *this;
-	t.Zoom(Point(0,0), scale);
+	t.Zoom(Point(0, 0), scale);
 	t.Draw(origin);
 }
 
@@ -1008,25 +1011,25 @@ string Line::PrintInfo()
 	s = "-------\ntype = " + to_string(type) + "\n";
 	if (type == 0)
 	{
-		string s1,s2;
+		string s1, s2;
 		s1 = a.PrintInfo();
 		s2 = b.PrintInfo();
-		s = s + s1 + "\n" + s2+"-------\n";
+		s = s + s1 + "\n" + s2 + "-------\n";
 	}
 	else
 	{
-		string sc,sa,sb;
+		string sc, sa, sb;
 		sc = center.PrintInfo();
 		sa = a.PrintInfo();
 		sb = b.PrintInfo();
-		s = s + "Center:" + sc + "\nStart:" + sa + "\nEnd:" + sb+"-------\n";
+		s = s + "Center:" + sc + "\nStart:" + sa + "\nEnd:" + sb + "-------\n";
 	}
 	return s;
 }
 string Shape::PrintInfo()
 {
 	string s;
-	s ="------\nShape with " + to_string(lines.size()) + " lines:\n";
+	s = "------\nShape with " + to_string(lines.size()) + " lines:\n";
 	for (int i = 0; i < lines.size(); i++)
 	{
 		s = s + lines[i].PrintInfo() + "\n";
