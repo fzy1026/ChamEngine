@@ -628,13 +628,15 @@ void Image::Zoom(double scale)
 
 Entity::Entity()
 {
-	CrashBox = Shape();
+	pos = Point(0, 0);
+	crashbox = Shape();
 	skinIndex = 0;
 }
 
 Entity::Entity(Image image)
 {
-	CrashBox = Rectangle(Point(0, 0), image.width, image.height);
+	pos = Point(0, 0);
+	crashbox = Rectangle(Point(0, 0), image.width, image.height);
 	skins.push_back(image);
 	skinIndex = 0;
 }
@@ -651,7 +653,7 @@ void Entity::SetPosition(Point p)
 
 void Entity::SetCrashBox(Shape box)
 {
-	CrashBox = box;
+	crashbox = box;
 }
 
 Point Entity::GetPosition()
@@ -661,7 +663,7 @@ Point Entity::GetPosition()
 
 Shape Entity::GetCrashBox()
 {
-	return CrashBox;
+	return crashbox;
 }
 
 void Entity::SetSkin(int index)
@@ -700,7 +702,7 @@ int Entity::AddSkin(string path)
 
 void Entity::Draw(Point origin)
 {
-	Point realPos = pos.RelToAbs(origin);
+	Point realPos = pos.AbsToRel(origin);
 	CurrentSkin()->Draw(realPos);
 }
 
@@ -721,7 +723,7 @@ void Entity::MoveTo(int x, int y)
 
 void Entity::Zoom(Point center, double scale)
 {
-	CrashBox.Zoom(Point(0, 0), scale);
+	crashbox.Zoom(Point(0, 0), scale);
 	pos.Zoom(center, scale);
 	for (int i = 0; i < skins.size(); i++)
 	{
@@ -734,7 +736,7 @@ void Entity::Zoom(Point center, double scale)
 void Entity::Rotate(Point origin, double arg)
 {
 	pos.Rotate(origin, arg);
-	CrashBox.Rotate(Point(0, 0), arg);
+	crashbox.Rotate(Point(0, 0), arg);
 	for (int i = 0; i < skins.size(); i++)
 	{
 		skins[i].Rotate(arg);
@@ -748,7 +750,7 @@ Image *Entity::CurrentSkin()
 
 bool Crash(Entity a, Entity b)
 {
-	return Crash(a.CrashBox, b.CrashBox);
+	return Crash(a.crashbox, b.crashbox);
 }
 
 Scene::Scene(Point p)
@@ -906,16 +908,13 @@ void Textbox::SetColor(COLORREF Color)
 
 void Textbox::Draw(Point origin)
 {
-	// Entity::Draw(origin);
+	Entity::Draw(origin);
 	settextcolor(color);
 	settextstyle(int(fontSize), 0, fontName.c_str());
 	Point realpos = pos.AbsToRel(origin).ToEasyX();
 	Point realleftup = Point(realpos.x - width / 2, realpos.y - height / 2);
 	Point realrightdown = Point(realpos.x + width / 2, realpos.y + height / 2);
 	RECT rect = {realleftup.x, realleftup.y, realrightdown.x, realrightdown.y};
-	// TODO:Debug
-	//cout << "Debug size" << width << " " << height << endl;
-	//cout << "Debug rect" << realleftup.x << " " << realleftup.y << " " << realrightdown.x << " " << realrightdown.y << endl;
 	drawtext(text.c_str(), &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 }
 
@@ -940,7 +939,7 @@ Textbox::Textbox(string Text, int Width, int Height, int FontSize, string FontNa
 	text = Text;
 	width = Width;
 	height = Height;
-	CrashBox = Rectangle(Point(0, 0), Width, Height);
+	crashbox = Rectangle(Point(0, 0), Width, Height);
 	color = Color;
 	fontSize = FontSize;
 	fontName = FontName;
@@ -960,7 +959,7 @@ void AABB::Zoom(Point center, double scale)
 
 void Textbox::Zoom(Point center, double scale)
 {
-	CrashBox.Zoom(Point(0, 0), scale);
+	crashbox.Zoom(Point(0, 0), scale);
 	pos.Zoom(center, scale);
 	for (int i = 0; i < skins.size(); i++)
 	{
@@ -980,13 +979,57 @@ void Entity::Debug()
 void Entity::ZoomDraw(Point origin, double scale)
 {
 	Entity e = *this;
-	e.Zoom(origin, scale);
+	e.Zoom(Point(0,0), scale);
 	e.Draw(origin);
 }
 
 void Textbox::ZoomDraw(Point origin, double scale)
 {
 	Textbox t = *this;
-	t.Zoom(origin, scale);
+	t.Zoom(Point(0,0), scale);
 	t.Draw(origin);
+}
+
+string Point::PrintInfo()
+{
+	string s = "Pos:(" + to_string(x) + "," + to_string(y) + ")";
+	return s;
+}
+
+string AABB::PrintInfo()
+{
+	string s = "AABB:(" + to_string(minX) + "," + to_string(maxX) + "," + to_string(minY) + "," + to_string(maxY) + ")";
+	return s;
+}
+
+string Line::PrintInfo()
+{
+	string s;
+	s = "-------\ntype = " + to_string(type) + "\n";
+	if (type == 0)
+	{
+		string s1,s2;
+		s1 = a.PrintInfo();
+		s2 = b.PrintInfo();
+		s = s + s1 + "\n" + s2+"-------\n";
+	}
+	else
+	{
+		string sc,sa,sb;
+		sc = center.PrintInfo();
+		sa = a.PrintInfo();
+		sb = b.PrintInfo();
+		s = s + "Center:" + sc + "\nStart:" + sa + "\nEnd:" + sb+"-------\n";
+	}
+	return s;
+}
+string Shape::PrintInfo()
+{
+	string s;
+	s ="------\nShape with " + to_string(lines.size()) + " lines:\n";
+	for (int i = 0; i < lines.size(); i++)
+	{
+		s = s + lines[i].PrintInfo() + "\n";
+	}
+	return s;
 }

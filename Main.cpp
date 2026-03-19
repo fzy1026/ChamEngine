@@ -6,7 +6,6 @@
 #include <unistd.h>
 
 using namespace std;
-//TODO:文字展示
 //TODO:基础demo
 const int WinWidth = 640,WinHeight = 480;
 
@@ -15,7 +14,6 @@ int main()
 {
 	Point Origin(WinWidth/2,WinHeight/2);
 	InitEngine(WinWidth, WinHeight);
-	
 	Textbox textbox("Hello, World!", 600, 100);
 	textbox.SetPosition(0, 0);
 	textbox.AddSkin("resources/images/test.png");
@@ -25,12 +23,10 @@ int main()
 	Scene main(Origin);
 	COLORREF bgColor = BLACK;
 	main.SetBackgroundColor(bgColor);
-	main.scale = 0.5;
+	main.scale = 0.25;
 
 	main.AddEntity(&textbox);
 
-	int TestX = 10;
-	textbox.Move(0,30);
 
 	while (1)
 	{
@@ -74,6 +70,7 @@ int main()
 		
 
 		main.Draw();
+
 		//textbox.Debug();
 	}
 	closegraph();

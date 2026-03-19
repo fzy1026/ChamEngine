@@ -10,6 +10,7 @@ using namespace std;
 绝对坐标：以窗口左下角为原点的坐标系，坐标轴方向同相对坐标
 EasyX坐标：以窗口右上角为原点的坐标系，x轴向右为正，y轴向下为正，这是一切EasyX库的，直接绘图函数采用的坐标系
 */
+
 class AABB;
 
 extern int GRAPH_WIDTH, GRAPH_HEIGHT; // 窗口长宽，坐标系转换用
@@ -27,6 +28,7 @@ public:
 	Point();
 	Point(int X, int Y);
 	AABB GetAABB();
+	string PrintInfo(); // 调试用，返回对象信息字符串
 	void Set(int X, int Y);
 	void Draw(Point origin = Point(0, 0), COLORREF color = WHITE); // 相对坐标转绝对坐标绘制
 	void Move(Point delta);
@@ -55,6 +57,7 @@ public:
 	AABB operator+(const AABB &a) const; // 包围盒合并运算
 	void Draw(Point origin = Point(0, 0), COLORREF color = WHITE);
 	void Zoom(Point center, double scale);
+	string PrintInfo(); // 调试用，返回对象信息字符串
 };
 
 // 包围盒碰撞检测
@@ -96,6 +99,7 @@ public:
 	double EndAngle();						 // 圆弧中止角
 	Line AbsToRel(Point origin);			 // 相对坐标转绝对坐标
 	Line RelToAbs(Point origin);			 // 绝对坐标转相对坐标
+	string PrintInfo();						 // 调试用，返回对象信息字符串
 };
 
 double Distance(Line l, Point p); // 点与直线/圆周距离
@@ -119,6 +123,7 @@ public:
 	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
 	Shape AbsToRel(Point origin);			 // 相对坐标转绝对坐标
 	Shape RelToAbs(Point origin);			 // 绝对坐标转相对坐标
+	string PrintInfo();						 // 调试用，返回对象信息字符串
 };
 
 bool Crash(Shape a, Shape b);						  // 不建议使用这个函数,除非你确定他们处于同一坐标系下！
@@ -149,7 +154,7 @@ class Entity
 public:
 	Entity();
 	Entity(Image image);
-	Shape CrashBox;
+	Shape crashbox;
 	vector<Image> skins;
 	int skinIndex;
 	Point pos; // 实体中心，实体的碰撞箱与皮肤均以pos为相对坐标系原点
@@ -163,13 +168,13 @@ public:
 	void DelSkin(int index);
 	int AddSkin(Image img);
 	int AddSkin(string path);
-	virtual void Draw(Point origin = Point(0, 0));	  // 以origin为pos绝对坐标，转EasyX坐标绘制
-	void Move(int dx, int dy);						  // 位移
-	void MoveTo(Point newPos);						  // 移动到新位置(相对坐标)
-	void MoveTo(int x, int y);						  // 移动到新位置(相对坐标)
-	void Rotate(Point center, double angle);		  // 以center(相对坐标)为中心逆时针旋转angle弧度
-	virtual void Zoom(Point center, double scale); // 以center(相对坐标)为中心缩放scale倍
-	virtual void ZoomDraw(Point origin = Point(0, 0),double scale = 1); // 以origin为中心，放大scale倍并绘制
+	virtual void Draw(Point origin = Point(0, 0));						 // 以origin为pos绝对坐标，转EasyX坐标绘制
+	void Move(int dx, int dy);											 // 位移
+	void MoveTo(Point newPos);											 // 移动到新位置(相对坐标)
+	void MoveTo(int x, int y);											 // 移动到新位置(相对坐标)
+	void Rotate(Point center, double angle);							 // 以center(相对坐标)为中心逆时针旋转angle弧度
+	virtual void Zoom(Point center, double scale);						 // 以center(相对坐标)为中心缩放scale倍
+	virtual void ZoomDraw(Point origin = Point(0, 0), double scale = 1); // 以origin为中心，放大scale倍并绘制
 	Image *CurrentSkin();
 	virtual ~Entity() = default;
 
@@ -198,7 +203,7 @@ public:
 	void SetColor(COLORREF Color);
 	void Draw(Point origin = Point(0, 0)) override;
 	void ZoomDraw(Point origin = Point(0, 0), double scale = 1) override; // 以origin为中心，放大scale倍并绘制
-	void Zoom(Point center, double scale) override; // 文本框覆写的Zoom函数
+	void Zoom(Point center, double scale) override;						  // 文本框覆写的Zoom函数
 };
 
 bool Crash(Entity a, Entity b); // 不建议直接使用这个函数，除非你确定两个实体处于同一坐标系下！
