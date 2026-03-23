@@ -578,7 +578,7 @@ Image::Image(string Address, int Height, int Width)
 	address = Address;
 	height = Height;
 	width = Width;
-	loadimage(&image, Address.c_str(),Width,Height, true);
+	loadimage(&image, Address.c_str(), Width, Height, true);
 	if (height * width == 0)
 	{
 		height = image.getheight();
@@ -594,8 +594,72 @@ void Image::SetSize(int Height, int Width)
 
 void Image::Draw(Point origin, DWORD dwrop)
 {
-	Point pos = origin.ToEasyX();
-	putimage(pos.x - (width / 2), pos.y - (height / 2), &image, dwrop);
+	origin = origin.ToEasyX();
+    if (image.getwidth() == 0 || image.getheight() == 0) {
+        return;
+    }
+    
+    int startX = origin.x - image.getwidth() / 2;
+    int startY = origin.y - image.getheight() / 2;
+    
+    int screenW = width;
+    int screenH = height;
+    IMAGE tempBuffer(screenW, screenH);
+    
+    // 将当前屏幕内容复制到临时图片
+    getimage(&tempBuffer, 0, 0, screenW, screenH);
+    
+    // 获取图片缓冲区指针（按字节访问）
+    BYTE* pSrc = (BYTE*)GetImageBuffer(&image);
+    BYTE* pDst = (BYTE*)GetImageBuffer(&tempBuffer);
+    int w = image.getwidth();
+    int h = image.getheight();
+    
+    // 遍历所有像素，混合到临时图片
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            int srcIndex = (i * w + j) * 4;
+            BYTE b = pSrc[srcIndex];
+            BYTE g = pSrc[srcIndex + 1];
+            BYTE r = pSrc[srcIndex + 2];
+            BYTE a = pSrc[srcIndex + 3];
+            
+            // 完全透明，跳过
+            if (a == 0) continue;
+            
+            int x = startX + j;
+            int y = startY + i;
+            
+            // 边界检查
+            if (x < 0 || x >= screenW || y < 0 || y >= screenH) continue;
+            
+            int dstIndex = (y * screenW + x) * 4;
+            
+            // 完全不透明，直接复制
+            if (a == 255) {
+                pDst[dstIndex] = b;
+                pDst[dstIndex + 1] = g;
+                pDst[dstIndex + 2] = r;
+            } 
+            // 半透明，混合后写入
+            else {
+                BYTE dstB = pDst[dstIndex];
+                BYTE dstG = pDst[dstIndex + 1];
+                BYTE dstR = pDst[dstIndex + 2];
+                
+                BYTE newB = (b * a + dstB * (255 - a)) / 255;
+                BYTE newG = (g * a + dstG * (255 - a)) / 255;
+                BYTE newR = (r * a + dstR * (255 - a)) / 255;
+                
+                pDst[dstIndex] = newB;
+                pDst[dstIndex + 1] = newG;
+                pDst[dstIndex + 2] = newR;
+            }
+        } 	
+    }
+    
+    // 将临时图片一次性输出到屏幕
+    putimage(origin.x, origin.y, &tempBuffer);
 }
 
 void Image::Rotate(double angle)
@@ -610,8 +674,9 @@ void Image::SetAng(double angle)
 
 void Image::Load()
 {
-	loadimage(&image, address.c_str(),width, height, true);
-	rotateimage(&image, &image, ang, BLACK, true, true);
+	loadimage(&image, address.c_str(), width, height, true);
+
+	//rotateimage(&image, &image, ang, BLACK, true, true);
 	// TODO:图片旋转后空白部分填充问题
 }
 
@@ -1035,4 +1100,12 @@ string Shape::PrintInfo()
 		s = s + lines[i].PrintInfo() + "\n";
 	}
 	return s;
+}
+void Scene::Run()
+{
+	RefreshKeyState();
+	for (int i = 0; i < entities.size(); i++)
+	{
+		entities[i].first->Run();
+	}
 }

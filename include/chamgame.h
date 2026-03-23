@@ -177,6 +177,7 @@ public:
 	virtual void ZoomDraw(Point origin = Point(0, 0), double scale = 1); // 以origin为中心，放大scale倍并绘制
 	Image *CurrentSkin();
 	virtual ~Entity() = default;
+	virtual void Run(){}; // 实体的运行函数，每帧调用一次
 
 	void Debug();
 };
@@ -223,7 +224,7 @@ public:
 	Scene(Point p = Point(0, 0));
 	void SetOrigin(Point p);
 	void Draw();									 // 优先级高（相同时索引靠前）的实体后绘制
-	int AddEntity(Entity *entity, int priority = 0); // 返回加入的实体（加在尾部）的索引
+	int AddEntity(Entity *entity, int priority = 0); // 添加实体到场景，返回实体索引，优先级高的实体后绘制，优先级相同的实体按照添加顺序绘制
 	void SetEntity(Entity *entity, int index);		 // 更改某索引对应的实体
 	void DelEntity(int index);						 // 删除某索引对应的实体，这一操作可能导致其他实体索引更改！
 	int GetIndex(Entity *entity);					 // 查找实体对应索引,-1代表未找到
@@ -231,6 +232,7 @@ public:
 	void SetScale(double Scale);
 	void SetBackgroundColor(COLORREF color); // 设置背景色
 	Point GetMousePos();
+	void Run(); // 场景的运行函数，每帧调用一次，负责刷新键盘状态以及场景内实体的运行
 	// TODO:查找部分也许可以加优化....?
 };
 
