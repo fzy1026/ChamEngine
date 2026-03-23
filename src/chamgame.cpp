@@ -1109,3 +1109,17 @@ void Scene::Run()
 		entities[i].first->Run();
 	}
 }
+
+void Shape::Move(Point delta)
+{
+	for (int i = 0; i < lines.size(); i++)
+	{
+		lines[i].Move(delta);
+	}
+}
+
+void Shape::Move(int dx, int dy)
+{
+	Point delta(dx, dy);
+	Move(delta);
+}

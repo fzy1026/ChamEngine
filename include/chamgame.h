@@ -88,8 +88,6 @@ public:
 	void Draw(Point origin = Point(0, 0), COLORREF color = WHITE); // 以origin为相对坐标系零点，转绝对坐标绘制
 	void Move(Point delta);
 	void Move(int dx, int dy);
-	void MoveTo(Point newPos);
-	void MoveTo(int x, int y);
 	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
 	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
 	bool AngleContains(double angle);		 // 某个角度是否被包含在弧线中
@@ -117,8 +115,6 @@ public:
 	void Draw(Point origin = Point(0, 0), COLORREF color = WHITE); // 以origin为相对坐标系原点,转绝对坐标绘制
 	void Move(Point delta);
 	void Move(int dx, int dy);
-	void MoveTo(Point newPos);
-	void MoveTo(int x, int y);
 	void Rotate(Point center, double angle); // 以center(相对坐标)为中心逆时针旋转angle弧度
 	void Zoom(Point center, double scale);	 // 以center(相对坐标)为中心缩放scale倍
 	Shape AbsToRel(Point origin);			 // 相对坐标转绝对坐标
