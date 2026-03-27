@@ -1,8 +1,8 @@
 #ifndef CHAMGAME_H
 #define CHAMGAME_H
 #include "chammath.h"
-#include <easyx/easyx.h>
-#include <easyx/graphics.h>
+#include "easyx.h"
+#include "graphics.h"
 using namespace std;
 /*
 一些烦人的坐标系细节：
